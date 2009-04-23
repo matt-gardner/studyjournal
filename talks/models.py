@@ -24,4 +24,29 @@ class Talk(models.Model):
         return self.title+', '+self.speaker
 
 
+class Person(models.Model):
+    GENDER_CHOICES = ((u'M', u'Male'), (u'F', u'Female'),)
+
+    name = models.CharField(max_length=100)
+    gender = models.CharField(max_length=2, choices=GENDER_CHOICES)
+
+    def callings(self):
+        string = ''
+        for calling in self.calling_set.all():
+            string += calling.calling+', '
+        return string[:-2]
+
+    def __unicode__(self):
+        return self.name
+
+
+class Calling(models.Model):
+    calling = models.CharField(max_length=100)
+    startdate = models.DateField('Date Called')
+    enddate = models.DateField('Date Released', null=True, blank=True)
+    person = models.ForeignKey(Person)
+
+    def __unicode__(self):
+        return self.calling
+
 # Create your models here.
