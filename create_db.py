@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from studyjournal.talks.models import Talk
+from studyjournal.talks.models import Talk, Person
 from datetime import date
 
 def main():
@@ -32,9 +32,11 @@ def create_people():
             else:
                 person.calling_set.create(calling=callingname, startdate=sdate)
         else:
-            name, gender = line.split(', ')
+            name, gender = line.split(': ')
             person = Person(name=name, gender=gender)
             person.save()
+    person = Person(name='Other', gender='M')
+    person.save()
 
 def create_talks():
     indexfile = 'data/indexfile.txt'
@@ -88,38 +90,17 @@ def parse_file(talkfile):
         text = text + line.decode('utf-8')
     day = int(day)
     year = int(year)
-    month = get_month(month)
+    month = int(month)
     d = date(year, month, day)
-    talk = Talk(speaker=speaker, calling=calling, gender=gender, date=d,
-            title=title, text=text, topic=topic, type=type)
+    try:
+        sid = Person.objects.get(name=speaker)
+        talk = Talk(speaker=sid, date=d, title=title, text=text, topic=topic, 
+                type=type)
+    except Person.DoesNotExist:
+        sid = Person.objects.get(name='Other')
+        talk = Talk(speaker=sid, speakername=speaker, date=d, title=title, 
+                text=text, topic=topic, type=type)
     talk.save()
-
-def get_month(month):
-    if 'Jan' in month:
-        m = 1
-    elif 'Feb' in month:
-        m = 2
-    elif 'Mar' in month:
-        m = 3
-    elif 'Apr' in month:
-        m = 4
-    elif 'May' in month: 
-        m = 5
-    elif 'Jun' in month: 
-        m = 6
-    elif 'Jul' in month: 
-        m = 7
-    elif 'Aug' in month: 
-        m = 8
-    elif 'Sep' in month: 
-        m = 9
-    elif 'Oct' in month:
-        m = 10
-    elif 'Nov' in month:
-        m = 11
-    elif 'Dec' in month:
-        m = 12
-    return m
 
 
 if __name__ == '__main__':

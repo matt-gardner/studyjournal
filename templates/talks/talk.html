@@ -1,0 +1,9 @@
+{% if talk.speakername %}
+<h1>{{ talk.speakername }} </h1>
+{% else %}
+<h1>{{ talk.speaker.name }}</h1>
+{% endif %}
+<h3>{{ talk.date }}</h3>
+<h3>{{ talk.type }}</h3>
+<h3>Title: {{ talk.title }}</h3>
+{{ talk.htmltext }} 

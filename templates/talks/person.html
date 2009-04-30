@@ -1,0 +1,17 @@
+<h1>{{ person.name }}</h1>
+{% if callings %}
+<h3> Callings </h3>
+	<ul>
+	{% for calling in callings %}
+	<li>{{ calling.pretty }}</li>
+	{% endfor %}
+	</ul>
+{% endif %}
+{% if talks %}
+<h3> Talks </h3>
+	<ul>
+	{% for talk in talks %}
+	<li><a href="../../talk/{{ talk.id }}">{{ talk.pretty }}</a></li>
+	{% endfor %}
+	</ul>
+{% endif %}

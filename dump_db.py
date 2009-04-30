@@ -10,8 +10,11 @@ def main():
 
 def output_people():
     f = open('people.txt', 'w')
-    for person in Person.objects.all():
-        f.write(person.name+', '+person.gender+'\n')
+    for person in Person.objects.all().order_by('name'):
+        if person.name == 'Other':
+            continue
+        namegender = person.name+': '+person.gender+'\n'
+        f.write(namegender.encode('utf-8'))
         for calling in person.calling_set.all():
             callingstr = calling.calling+': '
             callingstr += str(calling.startdate.day)+'/'+\
@@ -43,9 +46,16 @@ def output_talks():
         talkfile = 'gc/'+yearstr+'/'+monthstr+'/'+str(talk.id)+'.txt'
         talks.append(talkfile)
         f = open(talkfile, 'w')
-        f.write('SPEAKER: '+talk.speaker.encode('utf-8')+'\n')
-        f.write('CALLING: '+talk.calling.encode('utf-8')+'\n')
-        f.write('GENDER: '+talk.gender.encode('utf-8')+'\n')
+        if talk.speakername:
+            f.write('SPEAKER: '+talk.speakername.encode('utf-8')+'\n')
+        else:
+            f.write('SPEAKER: '+talk.speaker.name.encode('utf-8')+'\n')
+        try:
+            calling = talk.speaker.get_calling(talk.date)
+            f.write('CALLING: '+calling.encode('utf-8')+'\n')
+        except ValueError:
+            f.write('CALLING: Unknown\n')
+        f.write('GENDER: '+talk.speaker.gender.encode('utf-8')+'\n')
         f.write('TITLE: '+talk.title.encode('utf-8')+'\n')
         f.write('TOPIC: '+talk.topic.encode('utf-8')+'\n')
         f.write('TYPE: '+talk.type.encode('utf-8')+'\n')

@@ -1,0 +1,9 @@
+{% if people_list %}
+	<ul>
+	{% for person in people_list %}
+	<li><a href="person/{{ person.id }}">{{ person.name }}</a></li>
+	{% endfor %}
+	</ul>
+{% else %}
+	<p> No people! </p>
+{% endif %}
