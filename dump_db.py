@@ -10,13 +10,13 @@ def main():
 
 def output_people():
     f = open('people.txt', 'w')
-    for person in Person.objects.all().order_by('name'):
-        if person.name == 'Other':
+    for person in Person.objects.all().order_by('lastname'):
+        if person.lastname == 'Other':
             continue
-        namegender = person.name+': '+person.gender+'\n'
+        namegender = person.name()+': '+person.gender+'\n'
         f.write(namegender.encode('utf-8'))
         for calling in person.calling_set.all():
-            callingstr = calling.calling+': '
+            callingstr = calling.__unicode__()+': '
             callingstr += str(calling.startdate.day)+'/'+\
                     str(calling.startdate.month)+'/'+\
                     str(calling.startdate.year)+'-'
@@ -49,7 +49,7 @@ def output_talks():
         if talk.speakername:
             f.write('SPEAKER: '+talk.speakername.encode('utf-8')+'\n')
         else:
-            f.write('SPEAKER: '+talk.speaker.name.encode('utf-8')+'\n')
+            f.write('SPEAKER: '+talk.speaker.name().encode('utf-8')+'\n')
         try:
             calling = talk.speaker.get_calling(talk.date)
             f.write('CALLING: '+calling.encode('utf-8')+'\n')

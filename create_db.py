@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from studyjournal.talks.models import Talk, Person
+from studyjournal.talks.models import Talk, Person, Calling
 from datetime import date
 
 def main():
@@ -18,6 +18,14 @@ def create_people():
         if line[0] == ' ':
             fields = line.split(': ')
             callingname = fields[0].strip()
+            other = None
+            for calling in Calling.CALLING_CHOICES:
+                if callingname == calling[1]:
+                    callingname = calling[0]
+                    break
+            else:
+                other = callingname
+                callingname = 'O'
             dates = fields[1].split('-')
             sday, smonth, syear = dates[0].split('/')
             sdate = date(int(syear), int(smonth), int(sday))
@@ -27,16 +35,34 @@ def create_people():
                 eday, emonth, eyear = dates[1].split('/')
                 edate = date(int(eyear), int(emonth), int(eday))
             if edate:
-                person.calling_set.create(calling=callingname, startdate=sdate,
-                        enddate=edate)
+                person.calling_set.create(calling=callingname, othername=other,
+                        startdate=sdate, enddate=edate)
             else:
-                person.calling_set.create(calling=callingname, startdate=sdate)
+                person.calling_set.create(calling=callingname, othername=other,
+                        startdate=sdate)
         else:
             name, gender = line.split(': ')
-            person = Person(name=name, gender=gender)
+            firstname, middlename, lastname, suffix = parse_name(name)
+            person = Person(firstname=firstname, middlename=middlename, 
+                    lastname=lastname, suffix=suffix, gender=gender)
             person.save()
-    person = Person(name='Other', gender='M')
+    person = Person(firstname='Other', lastname='Other', gender='M')
     person.save()
+
+def parse_name(name):
+    tmp = name.split(', ')
+    if len(tmp) == 1:
+        suffix = '_'
+    else:
+        suffix = tmp[1]
+    names = tmp[0].split(' ')
+    firstname = names[0]
+    lastname = names[-1]
+    middlename = ' '.join(names[1:-1])
+    if middlename == '':
+        middlename = '_'
+    return firstname, middlename, lastname, suffix
+
 
 def create_talks():
     indexfile = 'data/indexfile.txt'
@@ -92,12 +118,14 @@ def parse_file(talkfile):
     year = int(year)
     month = int(month)
     d = date(year, month, day)
+    firstname, middlename, lastname, suffix = parse_name(speaker)
     try:
-        sid = Person.objects.get(name=speaker)
+        sid = Person.objects.get(firstname=firstname, middlename=middlename,
+                lastname=lastname, suffix=suffix)
         talk = Talk(speaker=sid, date=d, title=title, text=text, topic=topic, 
                 type=type)
     except Person.DoesNotExist:
-        sid = Person.objects.get(name='Other')
+        sid = Person.objects.get(firstname='Other')
         talk = Talk(speaker=sid, speakername=speaker, date=d, title=title, 
                 text=text, topic=topic, type=type)
     talk.save()
