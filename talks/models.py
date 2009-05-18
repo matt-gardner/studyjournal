@@ -21,6 +21,7 @@ class Talk(models.Model):
     text = models.TextField()
     topic = models.CharField(max_length=500, blank=True)
     type = models.CharField(max_length=5, choices=TYPE_CHOICES)
+    externallink = models.CharField(max_length=500, blank=True)
 
     def __unicode__(self):
         if self.speakername:
@@ -47,14 +48,14 @@ class Person(models.Model):
 
     def name(self):
         if self.middlename == '_':
-            middlename = ''
+            middlename = ' '
         else:
-            middlename = self.middlename
+            middlename = ' '+self.middlename+' '
         if self.suffix == '_':
             suffix = ''
         else:
             suffix = ', '+self.suffix
-        return self.firstname+' '+middlename+' '+self.lastname+suffix
+        return self.firstname+middlename+self.lastname+suffix
 
     def callings(self):
         string = ''
@@ -76,7 +77,6 @@ class Person(models.Model):
     def numtalks(self):
         return str(len(Talk.objects.filter(speaker=self.id)))
     numtalks.short_description='Number of Talks'
-
 
     def get_calling(self, date):
         for calling in self.calling_set.all():

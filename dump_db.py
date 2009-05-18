@@ -2,6 +2,7 @@
 
 from studyjournal.talks.models import Person, Talk
 from subprocess import Popen
+from month import make_month_str
 import os
 
 def main():
@@ -62,6 +63,7 @@ def output_talks():
         f.write('YEAR: '+str(talk.date.year)+'\n')
         f.write('MONTH: '+str(talk.date.month)+'\n')
         f.write('DAY: '+str(talk.date.day)+'\n')
+        f.write('LINK: '+str(talk.externallink)+'\n')
         f.write('\n')
         f.write(talk.text.encode('utf-8'))
         f.close()
@@ -69,32 +71,6 @@ def output_talks():
     for talk in talks:
         f.write(talk+'\n')
     f.close()
-
-def make_month_str(month):
-    if month == 1:
-        return 'Jan'
-    if month == 2:
-        return 'Feb'
-    if month == 3:
-        return 'Mar'
-    if month == 4:
-        return 'Apr'
-    if month == 5:
-        return 'May'
-    if month == 6:
-        return 'Jun'
-    if month == 7:
-        return 'Jul'
-    if month == 8:
-        return 'Aug'
-    if month == 9:
-        return 'Sep'
-    if month == 10:
-        return 'Oct'
-    if month == 11:
-        return 'Nov'
-    if month == 12:
-        return 'Dec'
 
 if __name__ == '__main__':
     main()

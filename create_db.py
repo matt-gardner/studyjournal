@@ -2,6 +2,7 @@
 
 from studyjournal.talks.models import Talk, Person, Calling
 from datetime import date
+from name import split_name
 
 def main():
     create_people()
@@ -42,26 +43,12 @@ def create_people():
                         startdate=sdate)
         else:
             name, gender = line.split(': ')
-            firstname, middlename, lastname, suffix = parse_name(name)
+            firstname, middlename, lastname, suffix = split_name(name)
             person = Person(firstname=firstname, middlename=middlename, 
                     lastname=lastname, suffix=suffix, gender=gender)
             person.save()
     person = Person(firstname='Other', lastname='Other', gender='M')
     person.save()
-
-def parse_name(name):
-    tmp = name.split(', ')
-    if len(tmp) == 1:
-        suffix = '_'
-    else:
-        suffix = tmp[1]
-    names = tmp[0].split(' ')
-    firstname = names[0]
-    lastname = names[-1]
-    middlename = ' '.join(names[1:-1])
-    if middlename == '':
-        middlename = '_'
-    return firstname, middlename, lastname, suffix
 
 
 def create_talks():
@@ -87,6 +74,7 @@ def parse_file(talkfile):
     year = False
     month = False
     day = False
+    link = ''
     while True:
         line = talkfile.readline().decode('utf-8')
         if 'SPEAKER' in line:
@@ -107,6 +95,8 @@ def parse_file(talkfile):
             month = line[7:-1]
         if 'DAY' in line:
             day = line[5:-1]
+        if 'LINK' in line:
+            link = line[6:-1]
         if line.isspace():
             break
         if not line:
@@ -118,16 +108,16 @@ def parse_file(talkfile):
     year = int(year)
     month = int(month)
     d = date(year, month, day)
-    firstname, middlename, lastname, suffix = parse_name(speaker)
+    firstname, middlename, lastname, suffix = split_name(speaker)
     try:
         sid = Person.objects.get(firstname=firstname, middlename=middlename,
                 lastname=lastname, suffix=suffix)
         talk = Talk(speaker=sid, date=d, title=title, text=text, topic=topic, 
-                type=type)
+                type=type, externallink=link)
     except Person.DoesNotExist:
         sid = Person.objects.get(firstname='Other')
         talk = Talk(speaker=sid, speakername=speaker, date=d, title=title, 
-                text=text, topic=topic, type=type)
+                text=text, topic=topic, type=type, externallink=link)
     talk.save()
 
 

@@ -8,7 +8,7 @@ class TalkAdmin(admin.ModelAdmin):
     list_display_links = ('title',)
     list_filter = ['speaker']
     search_fields = ['^speaker__firstname', '^speaker__middlename',
-            '^speaker__lastname', '^speaker__suffix']
+            '^speaker__lastname', '^speaker__suffix', 'speakername', 'title']
     date_hierarchy = 'date'
     ordering = ['speaker', 'speakername', 'date']
 
