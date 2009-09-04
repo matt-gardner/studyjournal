@@ -2,4 +2,5 @@
 *.pyo
 *.swp
 data/
+gc/
 db

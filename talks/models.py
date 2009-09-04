@@ -36,6 +36,9 @@ class Talk(models.Model):
         return SafeString('<p>'+\
                 self.text.replace('\n','</p><p>').encode('utf-8')+'</p>')
 
+    def date_string(self):
+        return str(self.date)
+
 
 class Person(models.Model):
     GENDER_CHOICES = ((u'M', u'Male'), (u'F', u'Female'),)
@@ -45,6 +48,8 @@ class Person(models.Model):
     lastname = models.CharField(max_length=100)
     suffix = models.CharField(max_length=10)
     gender = models.CharField(max_length=2, choices=GENDER_CHOICES)
+    wikipedia_bio = models.CharField(max_length=1000, blank=True)
+    ga_bio = models.CharField(max_length=1000, blank=True)
 
     def name(self):
         if self.middlename == '_':
@@ -75,7 +80,7 @@ class Person(models.Model):
         return string[:-2]
 
     def numtalks(self):
-        return str(len(Talk.objects.filter(speaker=self.id)))
+        return str(len(self.talk_set.all()))
     numtalks.short_description='Number of Talks'
 
     def get_calling(self, date):
