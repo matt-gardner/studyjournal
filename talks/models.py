@@ -1,5 +1,5 @@
 from django.db import models
-from datetime import date
+import datetime
 from django.utils.safestring import SafeString
 
 
@@ -58,7 +58,6 @@ class Person(models.Model):
         return self.firstname+middlename+self.lastname+suffix
 
     def callings(self):
-        string = ''
         callings = []
         for calling in self.calling_set.all():
             if len(callings) == 0:
@@ -70,22 +69,20 @@ class Person(models.Model):
                         break
                 else:
                     callings.append(calling)
-        for calling in callings:
-            string += calling.__unicode__()+', '
-        return string[:-2]
+        return ', '.join([x.__unicode__() for x in callings])
 
     def numtalks(self):
-        return str(len(Talk.objects.filter(speaker=self.id)))
+        return str(len(self.talk_set.all()))
     numtalks.short_description='Number of Talks'
 
     def get_calling(self, date):
         for calling in self.calling_set.all():
             if not calling.enddate:
-                enddate = date.today()
+                enddate = datetime.date.today()
             else:
                 enddate = calling.enddate
             startdate = calling.startdate
-            if date >= startdate and date <= enddate:
+            if startdate <= date <= enddate:
                 return calling.calling
         else:
             raise ValueError(self.name()+\
