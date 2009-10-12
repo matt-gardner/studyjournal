@@ -16,6 +16,10 @@ def output_people():
             continue
         namegender = person.name()+': '+person.gender+'\n'
         f.write(namegender.encode('utf-8'))
+        if person.wikipedia_bio:
+            f.write('  Wikipedia: '+person.wikipedia_bio+'\n')
+        if person.ga_bio:
+            f.write('  GA Bio: '+person.ga_bio+'\n')
         for calling in person.calling_set.all():
             callingstr = calling.__unicode__()+': '
             callingstr += str(calling.startdate.day)+'/'+\
@@ -32,20 +36,29 @@ def output_people():
 
 def output_talks():
     talks = []
-    if not os.path.exists('gc'):
-        proc = Popen(('mkdir','gc'))
-        proc.wait()
-    for talk in Talk.objects.filter(type='GC'):
+    for type, long_type in Talk.TYPE_CHOICES:
+        if not os.path.exists(type.lower()):
+            proc = Popen(('mkdir', type.lower()))
+            proc.wait()
+    for talk in Talk.objects.all():
+        typestr = talk.type.lower()
         yearstr = str(talk.date.year)
         monthstr = make_month_str(talk.date.month)
-        if not os.path.exists('gc/'+yearstr):
-            proc = Popen(('mkdir', 'gc/'+yearstr))
+        if not os.path.exists(typestr+'/'+yearstr):
+            proc = Popen(('mkdir', typestr+'/'+yearstr))
             proc.wait()
-        if not os.path.exists('gc/'+yearstr+'/'+monthstr):
-            proc = Popen(('mkdir', 'gc/'+yearstr+'/'+monthstr))
+        if not os.path.exists(typestr+'/'+yearstr+'/'+monthstr):
+            proc = Popen(('mkdir', typestr+'/'+yearstr+'/'+monthstr))
             proc.wait()
-        talkfile = 'gc/'+yearstr+'/'+monthstr+'/'+str(talk.id)+'.txt'
+        talkfile = typestr+'/'+yearstr+'/'+monthstr+'/'+str(talk.id)+'.txt'
         talks.append(talkfile)
+        output_talk(talk, talkfile)
+    f = open('indexfile.txt', 'w')
+    for talk in talks:
+        f.write(talk+'\n')
+    f.close()
+
+def output_talk(talk, talkfile):
         f = open(talkfile, 'w')
         if talk.speakername:
             f.write('SPEAKER: '+talk.speakername.encode('utf-8')+'\n')
@@ -67,10 +80,6 @@ def output_talks():
         f.write('\n')
         f.write(talk.text.encode('utf-8'))
         f.close()
-    f = open('indexfile.txt', 'w')
-    for talk in talks:
-        f.write(talk+'\n')
-    f.close()
 
 if __name__ == '__main__':
     main()

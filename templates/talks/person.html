@@ -1,4 +1,13 @@
 <h1>{{ person.name }}</h1>
+<h3> Bios </h3>
+<ul>
+{% if person.wikipedia_bio %}
+<li><a href="{{ person.wikipedia_bio }}">Wikipedia</a></li>
+{% endif %}
+{% if person.ga_bio %}
+<li><a href="{{ person.ga_bio }}">Grampa Bill's G.A. Pages</a></li>
+{% endif %}
+</ul>
 {% if callings %}
 <h3> Callings </h3>
 	<ul>
@@ -9,16 +18,24 @@
 {% endif %}
 {% if talks %}
 <h3> Talks </h3>
-	<ul>
+<table>
+	<tr><th>Title</th><th>Type</th><th>Date</th><th>Text</th><th>Link</th></tr>
 	{% for talk in talks %}
-		<li>
-			<a href="../../talk/{{ talk.id }}">{{ talk.pretty }}</a>
-			{% if talk.externallink %}
-				<a href="{{ talk.externallink }}">External Link</a>
+		<tr>
+			<td>{{ talk.title }}</td>
+			<td>{{ talk.get_type_display }}</td>
+			<td>{{ talk.date_string }}</td>
+			{% if talk.text %}
+				<td><a href="../../talk/{{ talk.id }}">Text</a></td>
 			{% else %}
-				No external link
+				<td>No text</td>
 			{% endif %}
-		</li>
+			{% if talk.externallink %}
+				<td><a href="{{ talk.externallink }}">Link</a></td>
+			{% else %}
+				<td>No link</td>
+			{% endif %}
+		</tr>
 	{% endfor %}
-	</ul>
+</table>
 {% endif %}

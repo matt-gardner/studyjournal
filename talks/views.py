@@ -7,7 +7,7 @@ def index(request):
 
 def person(request, person_id):
     person = get_object_or_404(Person, pk=person_id)
-    talks = person.talk_set.all()
+    talks = person.talk_set.all().order_by('-date')
     callings = person.calling_set.all()
     return render_to_response('talks/person.html', 
             {'person': person, 'talks': talks, 'callings': callings})

@@ -17,6 +17,16 @@ def create_people():
             break
         line = line[:-1]
         if line[0] == ' ':
+            if 'Wikipedia' in line:
+                wiki = line.split(': ')[1]
+                person.wikipedia_bio = wiki
+                person.save()
+                continue
+            if 'GA Bio' in line:
+                ga_bio = line.split(': ')[1]
+                person.ga_bio = ga_bio
+                person.save()
+                continue
             fields = line.split(': ')
             callingname = fields[0].strip()
             other = None

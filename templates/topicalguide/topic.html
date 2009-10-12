@@ -1,0 +1,29 @@
+<h1>{{ topic.name }}</h1>
+{% if topic.notes %}
+<h3> Notes </h3>
+{{ topic.notes }}
+{% endif %}
+{% if topic.talk_set %}
+<h3> Talks </h3>
+	<ul>
+	{% for talk in topic.talk_set %}
+	<li>
+	{% if talk.quote %}
+	{{ talk.quote }}
+	<br> --
+	{% endif %}
+	<a href='/talk/{{ talk.talk.id }}'>{{ talk }}</a>
+	</li>
+	{% endfor %}
+	</ul>
+{% endif %}
+{% if topic.scripture_set %}
+<h3> Scripture References </h3>
+	<ul>
+	{% for ref in topic.scripture_set %}
+	<li>{{ ref }}</li>
+	{% endfor %}
+	</ul>
+{% endif %}
+<a href='/topics/'>Back to topics</a>
+<a href='/'>Home</a>
