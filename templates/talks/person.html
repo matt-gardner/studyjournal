@@ -1,4 +1,13 @@
 <h1>{{ person.name }}</h1>
+<h3> Bios </h3>
+<ul>
+{% if person.wikipedia_bio %}
+<li><a href="{{ person.wikipedia_bio }}">Wikipedia</a></li>
+{% endif %}
+{% if person.ga_bio %}
+<li><a href="{{ person.ga_bio }}">Grampa Bill's G.A. Pages</a></li>
+{% endif %}
+</ul>
 {% if callings %}
 <h3> Callings </h3>
 	<ul>

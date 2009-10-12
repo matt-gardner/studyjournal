@@ -17,9 +17,9 @@ def output_people():
         namegender = person.name()+': '+person.gender+'\n'
         f.write(namegender.encode('utf-8'))
         if person.wikipedia_bio:
-            f.write('  Wikipedia: '+person.wikipedia_bio)
+            f.write('  Wikipedia: '+person.wikipedia_bio+'\n')
         if person.ga_bio:
-            f.write('  GA Bio: '+person.ga_bio)
+            f.write('  GA Bio: '+person.ga_bio+'\n')
         for calling in person.calling_set.all():
             callingstr = calling.__unicode__()+': '
             callingstr += str(calling.startdate.day)+'/'+\
@@ -52,6 +52,7 @@ def output_talks():
             proc.wait()
         talkfile = typestr+'/'+yearstr+'/'+monthstr+'/'+str(talk.id)+'.txt'
         talks.append(talkfile)
+        output_talk(talk, talkfile)
     f = open('indexfile.txt', 'w')
     for talk in talks:
         f.write(talk+'\n')

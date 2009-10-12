@@ -18,7 +18,7 @@ class CallingInline(admin.TabularInline):
 
 class PersonAdmin(admin.ModelAdmin):
     list_display = ('name', 'firstname', 'middlename', 'lastname', 'suffix',
-            'gender', 'numtalks', 'callings')
+            'gender', 'numtalks', 'callings', 'ga_bio')
     list_editable = ('firstname', 'middlename', 'lastname', 'suffix', 'gender')
     inlines = [CallingInline]
     ordering = ('lastname',)
