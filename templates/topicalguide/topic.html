@@ -3,7 +3,8 @@
 <h3> Notes </h3>
 {{ topic.notes }}
 {% endif %}
-{% if topic.talk_set %}
+<br>
+<a href="/topics/edit{{ topic.id}}">Edit name and notes</a>
 <h3> Talks </h3>
 	<ul>
 	{% for talk in topic.talk_set %}
@@ -13,17 +14,21 @@
 	<br> --
 	{% endif %}
 	<a href='/talk/{{ talk.talk.id }}'>{{ talk }}</a>
+	<a href='t{{ talk.id }}'>Edit</a>
 	</li>
 	{% endfor %}
 	</ul>
-{% endif %}
-{% if topic.scripture_set %}
+	<br>
+	<a href='addt'>Add a talk</a>
 <h3> Scripture References </h3>
 	<ul>
 	{% for ref in topic.scripture_set %}
-	<li>{{ ref }}</li>
+	<li>{{ ref }} <a href=sr{{ ref.id }}>Edit</a></li>
 	{% endfor %}
 	</ul>
-{% endif %}
+	<br>
+	<a href='addsr'>Add a scripture reference</a>
+<br>
+<br>
 <a href='/topics/'>Back to topics</a>
 <a href='/'>Home</a>
