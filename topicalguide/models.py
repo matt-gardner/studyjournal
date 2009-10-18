@@ -1,5 +1,6 @@
 from django.db import models
 from studyjournal.talks.models import Talk, Person
+from scriptures import split_for_sorting
 
 class Topic(models.Model):
     name = models.CharField(max_length=50)
@@ -18,6 +19,7 @@ class Topic(models.Model):
                 continue
             if talk_entry:
                 talk_set.append(talk_entry)
+        talk_set.sort(key=lambda x: (x.speaker.name(), x.__unicode__))
         return talk_set
 
     def scripture_set(self):
@@ -30,7 +32,20 @@ class Topic(models.Model):
                 continue
             if scripture_entry:
                 scripture_set.append(scripture_entry)
+        scripture_set.sort(key=lambda x: split_for_sorting(x.reference))
         return scripture_set
+
+    def num_entries(self):
+        if len(self.entry_set.all()) == 1:
+            return "1 entry"
+        else:
+            return "%d entries" % len(self.entry_set.all())
+
+    def index_name(self):
+        if self.name[:4] == 'The ':
+            return self.name[4:]+', The'
+        else:
+            return self.name
 
 
 class Entry(models.Model):

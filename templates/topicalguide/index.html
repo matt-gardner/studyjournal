@@ -1,9 +1,11 @@
 {% if topics %}
 	<ul>
 	{% for topic in topics %}
-	<li><a href="../topic/{{ topic.name }}">{{ topic.name }}</a></li>
+	<li><a href="../topic/{{ topic.name }}">{{ topic.index_name }}</a>
+	({{ topic.num_entries }})
+	</li>
 	{% endfor %}
 	</ul>
-{% else %}
-	<p> No topics! </p>
 {% endif %}
+<br><br>
+<a href="add">Add a new topic</a>
