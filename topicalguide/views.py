@@ -113,6 +113,43 @@ def add_talk_entry(request, topic_name, **kwds):
     page_vars['form'] = form
     return render_to_response('topicalguide/add_form.html', page_vars)
 
+def add_quote(request, topic_name, **kwds):
+    if request.POST:
+        if request.POST['edit'] != 'False':
+            entry = QuoteEntry.objects.get(pk=request.POST['edit'])
+            entry.person = Person.objects.get(pk=request.POST['person'])
+            entry.quote = request.POST['quote']
+            entry.source = request.POST['source'],
+            entry.notes = request.POST['notes']
+        else:
+            entry = QuoteEntry(
+                    topic=Topic.objects.get(name=topic_name),
+                    person=Person.objects.get(pk=request.POST['person']),
+                    quote=request.POST['quote'],
+                    source=request.POST['source'],
+                    notes=request.POST['notes'],
+                    )
+        entry.save()
+        return HttpResponseRedirect('/topic/'+topic_name)
+    page_vars = dict()
+    if kwds.has_key('entry_id'):
+        entry = QuoteEntry.objects.get(pk=kwds['entry_id'])
+        form = AddQuoteForm(initial={'topic': topic_name,
+                'notes': entry.notes,
+                'person': entry.person,
+                'quote': entry.quote,
+                'source': entry.source,
+                'edit': entry.id})
+        page_vars['submit_label'] = "Edit quote"
+        page_vars['header'] = "Edit a quote in " + topic_name
+    else:
+        form = AddQuoteForm(initial={'topic': topic_name,
+                'edit': 'False'})
+        page_vars['submit_label'] = "Add quote"
+        page_vars['header'] = "Add a quote to " + topic_name
+    page_vars['form'] = form
+    return render_to_response('topicalguide/add_form.html', page_vars)
+
 class AddTopicForm(forms.ModelForm):
     class Meta:
         model = Topic
@@ -124,6 +161,14 @@ class AddScriptureForm(forms.ModelForm):
     class Meta:
         model = ScriptureReferenceEntry
         fields = ['topic','reference','notes']
+
+class AddQuoteForm(forms.ModelForm):
+    topic = forms.CharField(label='Topic',
+            widget=forms.TextInput({'readonly':True}))
+    edit = forms.CharField(widget=forms.HiddenInput())
+    class Meta:
+        model = QuoteEntry
+        fields = ['topic','person','quote','source','notes']
 
 class AddTalkForm(forms.ModelForm):
     def __init__(self, edit=False, person=None, talk=None, *args, **kwds):

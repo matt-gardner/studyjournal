@@ -17,17 +17,23 @@ books = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua',
         'Abraham']
 
 def split_for_sorting(reference):
+    # We get rid of commas to make it easier to find where the book is.
+    # It's ok 'cause we're just sorting by book.  We treat them better when
+    # figuring out where to split links up.
+    reference = reference.replace(',', '')
     items = reference.split()
-    if ':' in items[1]:
-        ref_book = items[0]
-        rest = items[1:]
-    elif ':' in items[2]:
-        ref_book = ' '.join(items[:2])
-        rest = items[2:]
+    for i, item in enumerate(items):
+        if ':' in item or (item.isdigit() and i != 0):
+            ref_book = ' '.join(items[:i])
+            chapter = int(item.split(':')[0])
+            rest = ' '.join(items[i:])
+            break
+    else:
+        return (len(books)+2, 'unknown', 'unknown')
     for i, book in enumerate(books):
         if ref_book == book:
-            return (i, rest)
-    return (i+1, rest)
+            return (i, chapter, rest)
+    return (i+1, chapter, rest)
 
 
 # vim: et sw=4 sts=4

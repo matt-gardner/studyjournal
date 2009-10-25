@@ -19,7 +19,7 @@ class Topic(models.Model):
                 continue
             if talk_entry:
                 talk_set.append(talk_entry)
-        talk_set.sort(key=lambda x: (x.speaker.name(), x.__unicode__))
+        talk_set.sort(key=lambda x: (x.talk.speaker.name(), x.talk.__unicode__()))
         return talk_set
 
     def scripture_set(self):
@@ -64,6 +64,7 @@ class TalkEntry(Entry):
 class QuoteEntry(Entry):
     person = models.ForeignKey('talks.Person')
     quote = models.TextField()
+    #source = models.CharField(max_length=200)
     
     def __unicode__(self):
         return self.person.__unicode__()

@@ -28,6 +28,14 @@
 	</ul>
 	<br>
 	<a href='addsr'>Add a scripture reference</a>
+<h3> Quotes </h3>
+	<ul>
+	{% for quote in topic.quote_set %}
+	<li>{{ quote }} <a href=q{{ quote.id }}>Edit</a></li>
+	{% endfor %}
+	</ul>
+	<br>
+	<a href='addq'>Add a quote</a>
 <br>
 <br>
 <a href='/topics/'>Back to topics</a>
