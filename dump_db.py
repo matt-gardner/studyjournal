@@ -1,13 +1,47 @@
 #!/usr/bin/env python
 
 from studyjournal.talks.models import Person, Talk
+from studyjournal.topicalguide.models import Topic, Entry, TalkEntry
+from studyjournal.topicalguide.models import QuoteEntry
+from studyjournal.topicalguide.models import ScriptureReferenceEntry
 from subprocess import Popen
 from month import make_month_str
+from optparse import OptionParser
 import os
 
 def main():
-    output_people()
-    output_talks()
+    parser = OptionParser()
+    parser.add_option('', '--talks',
+            dest='talks',
+            default=False,
+            action='store_true',
+            help='Dump talks'
+            )
+    parser.add_option('', '--people',
+            dest='people',
+            default=False,
+            action='store_true',
+            help='Dump people'
+            )
+    parser.add_option('', '--topics',
+            dest='topics',
+            default=False,
+            action='store_true',
+            help='Dump topics'
+            )
+    options, args = parser.parse_args()
+    did_something = False
+    if options.people:
+        did_something = True
+        output_people()
+    if options.talks:
+        did_something = True
+        output_talks()
+    if options.topics:
+        did_something = True
+        output_topics()
+    if not did_something:
+        print 'Did you forget to specify what you wanted to output?'
 
 def output_people():
     f = open('people.txt', 'w')
@@ -80,6 +114,42 @@ def output_talk(talk, talkfile):
         f.write('\n')
         f.write(talk.text.encode('utf-8'))
         f.close()
+
+def output_topics():
+    f = open('topics.txt', 'w')
+    for topic in Topic.objects.all().order_by('name'):
+        f.write('Topic: ' + topic.name + '\n')
+        f.write('Notes: ' + topic.notes + '\n')
+        f.write('Entries: \n')
+        for entry in topic.entry_set.all():
+            try:
+                sr_entry = entry.scripturereferenceentry
+                f.write('Scripture: ' + sr_entry.reference + '\n')
+                f.write('Notes: ' + sr_entry.notes + '\n')
+                continue
+            except ScriptureReferenceEntry.DoesNotExist:
+                pass
+            try:
+                q_entry = entry.quoteentry
+                f.write('Quote: ' + q_entry.quote + '\n')
+                f.write('Person: ' + q_entry.person + '\n')
+                f.write('Notes: ' + q_entry.notes + '\n')
+                continue
+            except QuoteEntry.DoesNotExist:
+                pass
+            try:
+                t_entry = entry.talkentry
+                f.write('Talk: ' + t_entry.talk.title.encode('utf-8') + '\n')
+                f.write('Speaker: ' +
+                        t_entry.talk.speaker.name().encode('utf-8') + '\n')
+                f.write('Quote: ' + t_entry.quote.encode('utf-8') + '\n')
+                f.write('Notes: ' + t_entry.notes + '\n')
+                continue
+            except TalkEntry.DoesNotExist:
+                pass
+        f.write('\n')
+    f.close()
+    
 
 if __name__ == '__main__':
     main()

@@ -1,12 +1,46 @@
 #!/usr/bin/env python
 
 from studyjournal.talks.models import Talk, Person, Calling
+from studyjournal.topicalguide.models import Topic, Entry, TalkEntry
+from studyjournal.topicalguide.models import QuoteEntry
+from studyjournal.topicalguide.models import ScriptureReferenceEntry
 from datetime import date
 from name import split_name
+from optparse import OptionParser
 
 def main():
-    create_people()
-    create_talks()
+    parser = OptionParser()
+    parser.add_option('', '--talks',
+            dest='talks',
+            default=False,
+            action='store_true',
+            help='Import talks'
+            )
+    parser.add_option('', '--people',
+            dest='people',
+            default=False,
+            action='store_true',
+            help='Import people'
+            )
+    parser.add_option('', '--topics',
+            dest='topics',
+            default=False,
+            action='store_true',
+            help='Import topics'
+            )
+    options, args = parser.parse_args()
+    did_something = False
+    if options.people:
+        did_something = True
+        create_people()
+    if options.talks:
+        did_something = True
+        create_talks()
+    if options.topics:
+        did_something = True
+        create_topics()
+    if not did_something:
+        print 'Did you forget to specify what you wanted to import?'
 
 def create_people():
     peoplefile = open('data/people.txt')
@@ -74,6 +108,7 @@ def create_talks():
             print str(e)
             continue
 
+
 def parse_file(talkfile):
     speaker = False
     calling = False
@@ -130,6 +165,112 @@ def parse_file(talkfile):
                 text=text, topic=topic, type=type, externallink=link)
     talk.save()
 
+
+def create_topics():
+    f = open('data/topics.txt')
+    lines = f.readlines()
+    i = 0
+    while i < len(lines):
+        if lines[i] == '\n':
+            i += 1
+            continue
+        if lines[i][:7] == 'Topic: ':
+            name = lines[i][7:-1]
+            i += 1
+            notes = ''
+            while lines[i][:9] != 'Entries: ':
+                if lines[i][:7] == 'Notes: ':
+                    lines[i] = lines[i][7:]
+                notes += lines[i]
+                i += 1
+            topic = Topic(name=name, notes=notes[:-1])
+            topic.save()
+            continue
+        if lines[i][:9] == 'Entries: ':
+            i += 1
+            while lines[i] != '\n':
+                if lines[i][:11] == 'Scripture: ':
+                    i = get_sr_entry(lines, i, topic)
+                if lines[i][:6] == 'Talk: ':
+                    i = get_t_entry(lines, i, topic)
+                if lines[i][:7] == 'Quote: ':
+                    i = get_q_entry(lines, i, topic)
+        i += 1
+
+
+def get_sr_entry(lines, i, topic):
+    ref = lines[i][11:-1]
+    i += 1
+    notes = ''
+    while (lines[i][:11] != 'Scripture: ' and
+            lines[i][:6] != 'Talk: ' and
+            lines[i][:7] != 'Quote: ' and
+            lines[i] != '\n'):
+        if lines[i][:7] == 'Notes: ':
+            lines[i] = lines[i][7:]
+        notes += lines[i]
+        i += 1
+    entry = ScriptureReferenceEntry(topic=topic, reference=ref,
+            notes=notes[:-1])
+    entry.save()
+    return i
+
+
+def get_t_entry(lines, i, topic):
+    title = lines[i][6:-1]
+    i += 1
+    speaker = lines[i][9:-1]
+    firstname, middlename, lastname, suffix = split_name(speaker)
+    sid = Person.objects.get(firstname=firstname, middlename=middlename,
+            lastname=lastname, suffix=suffix)
+    talk = Talk.objects.get(speaker=sid, title=title)
+    i += 1
+    quote = ''
+    while (lines[i][:7] != 'Notes: '):
+        if lines[i][:7] == 'Quote: ':
+            lines[i] = lines[i][7:]
+        quote += lines[i]
+        i += 1
+    notes = ''
+    while (lines[i][:11] != 'Scripture: ' and
+            lines[i][:6] != 'Talk: ' and
+            lines[i][:7] != 'Quote: ' and 
+            lines[i] != '\n'):
+        if lines[i][:7] == 'Notes: ':
+            lines[i] = lines[i][7:]
+        notes += lines[i]
+        i += 1
+    entry = TalkEntry(topic=topic, talk=talk, quote=quote[:-1],
+            notes=notes[:-1])
+    entry.save()
+    return i
+
+
+def get_q_entry(lines, i, topic):
+    quote = ''
+    while (lines[i][:8] != 'Person: '):
+        if lines[i][:7] == 'Quote: ':
+            lines[i] = lines[i][7:]
+        quote += lines[i]
+        i += 1
+    person = lines[i][8:-1]
+    firstname, middlename, lastname, suffix = split_name(person)
+    sid = Person.objects.get(firstname=firstname, middlename=middlename,
+            lastname=lastname, suffix=suffix)
+    i += 1
+    notes = ''
+    while (lines[i][:11] != 'Scripture: ' and
+            lines[i][:6] != 'Talk: ' and
+            lines[i][:7] != 'Quote: ' and
+            lines[i] != '\n'):
+        if lines[i][:7] == 'Notes: ':
+            lines[i] = lines[i][7:]
+        notes += lines[i]
+        i += 1
+    entry = QuoteEntry(topic=topic, quote=quote[:-1], person=sid,
+            notes=notes[:-1])
+    entry.save()
+    return i
 
 if __name__ == '__main__':
     main()
