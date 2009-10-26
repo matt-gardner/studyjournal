@@ -1,0 +1,35 @@
+/* Positioning Divs */
+div.sitemenu
+{
+	position:fixed;
+	width:8%;
+	border-right:5px solid red;
+}
+div.sitemenu ul
+{
+	list-style-type:none;
+}
+div.page
+{
+	position:relative;
+	left:10%;
+	max-width:90%;
+}
+ul ul
+{
+	display:none;
+}
+li:hover ul
+{
+	display:block;
+	list-style-type:none;
+	list-style-image:none;
+}
+li.notes
+{
+	list-style-image: url("/site_media/arrow.jpg");
+}
+a:link, a:visited
+{
+	color:blue;
+}

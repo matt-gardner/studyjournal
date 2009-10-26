@@ -1,3 +1,8 @@
+{% extends "basetemplate.html" %}
+
+{% block title %}{{ talk }}{% endblock %}
+
+{% block content %}
 {% if talk.speakername %}
 <h1>{{ talk.speakername }} </h1>
 {% else %}
@@ -7,3 +12,4 @@
 <h3>{{ talk.type }}</h3>
 <h3>Title: {{ talk.title }}</h3>
 {{ talk.htmltext }} 
+{% endblock %}

@@ -1,3 +1,8 @@
+{% extends "basetemplate.html" %}
+
+{% block title %}{{ person.name }}{% endblock %}
+
+{% block content %}
 <h1>{{ person.name }}</h1>
 <h3> Bios </h3>
 <ul>
@@ -39,3 +44,4 @@
 	{% endfor %}
 </table>
 {% endif %}
+{% endblock %}

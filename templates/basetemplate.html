@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>{% block title %}{{ title|default:"Matt's Study Journal" }}{% endblock %}</title>
+<link rel="stylesheet" title="default" href="/site_media/style.css" type="text/css" />
+</head>
+
+<body>
+
+<div class="sitemenu">
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/topics">Topics</a></li>
+        <li><a href="/talks">Talks</a></li>
+    </ul>
+</div>
+
+<div class="page">
+
+{% block content %}
+{{ content }}
+{% endblock %}
+
+</div>
+
+</body>
+</html>

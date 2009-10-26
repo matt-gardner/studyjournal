@@ -31,6 +31,7 @@ def edit_topic(request, topic_id):
     topic = get_object_or_404(Topic, pk=topic_id)
     if request.POST:
         topic.name = request.POST['name']
+        topic.subheading = request.POST['subheading']
         topic.notes = request.POST['notes']
         topic.save()
         return HttpResponseRedirect('/topic/'+topic.name)
@@ -39,6 +40,22 @@ def edit_topic(request, topic_id):
     page_vars['form'] = form
     page_vars['submit_label'] = "Edit topic"
     page_vars['header'] = "Edit topic " + topic.name
+    return render_to_response('topicalguide/add_form.html', page_vars)
+
+
+def add_related_topic(request, topic_name, **kwds):
+    if request.POST:
+        topic = Topic.objects.get(name=topic_name)
+        related_topic = Topic.objects.get(pk=request.POST['related_topic'])
+        if (related_topic not in topic.related_topics.all() and
+                related_topic != topic):
+            topic.related_topics.add(related_topic)
+        return HttpResponseRedirect('/topic/'+topic_name)
+    page_vars = dict()
+    form = RelatedTopicForm()
+    page_vars['submit_label'] = "Add related topic"
+    page_vars['header'] = "Add a related topic to " + topic_name
+    page_vars['form'] = form
     return render_to_response('topicalguide/add_form.html', page_vars)
 
 
@@ -119,7 +136,7 @@ def add_quote(request, topic_name, **kwds):
             entry = QuoteEntry.objects.get(pk=request.POST['edit'])
             entry.person = Person.objects.get(pk=request.POST['person'])
             entry.quote = request.POST['quote']
-            entry.source = request.POST['source'],
+            entry.source = request.POST['source']
             entry.notes = request.POST['notes']
         else:
             entry = QuoteEntry(
@@ -136,7 +153,7 @@ def add_quote(request, topic_name, **kwds):
         entry = QuoteEntry.objects.get(pk=kwds['entry_id'])
         form = AddQuoteForm(initial={'topic': topic_name,
                 'notes': entry.notes,
-                'person': entry.person,
+                'person': entry.person.id, # this doesn't work -- why not?
                 'quote': entry.quote,
                 'source': entry.source,
                 'edit': entry.id})
@@ -153,6 +170,7 @@ def add_quote(request, topic_name, **kwds):
 class AddTopicForm(forms.ModelForm):
     class Meta:
         model = Topic
+        exclude = ['related_topics']
 
 class AddScriptureForm(forms.ModelForm):
     topic = forms.CharField(label='Topic',
@@ -166,6 +184,8 @@ class AddQuoteForm(forms.ModelForm):
     topic = forms.CharField(label='Topic',
             widget=forms.TextInput({'readonly':True}))
     edit = forms.CharField(widget=forms.HiddenInput())
+    person = forms.ModelChoiceField(Person.objects.all(),
+            label='Person', empty_label=None)
     class Meta:
         model = QuoteEntry
         fields = ['topic','person','quote','source','notes']
@@ -194,7 +214,8 @@ class AddTalkForm(forms.ModelForm):
         model = TalkEntry
         fields = ['topic','talk','quote', 'notes']
 
-class AddTalkForm1(forms.Form):
-    person = forms.ModelChoiceField(Person.objects.all(), label='Person')
+class RelatedTopicForm(forms.Form):
+    related_topic = forms.ModelChoiceField(Topic.objects.all(), label='Topic',
+            empty_label=None)
 
 

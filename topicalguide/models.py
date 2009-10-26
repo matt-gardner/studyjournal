@@ -4,7 +4,9 @@ from scriptures import split_for_sorting
 
 class Topic(models.Model):
     name = models.CharField(max_length=50)
+    subheading = models.CharField(max_length=100, blank=True)
     notes = models.TextField(blank=True)
+    related_topics = models.ManyToManyField('Topic')
 
     def __unicode__(self):
         return self.name
@@ -35,6 +37,17 @@ class Topic(models.Model):
         scripture_set.sort(key=lambda x: split_for_sorting(x.reference))
         return scripture_set
 
+    def quote_set(self):
+        quote_set = []
+        for entry in self.entry_set.all():
+            quote_entry = None
+            try:
+                quote_entry = entry.quoteentry
+                quote_set.append(quote_entry)
+            except QuoteEntry.DoesNotExist:
+                pass
+        return quote_set
+
     def num_entries(self):
         if len(self.entry_set.all()) == 1:
             return "1 entry"
@@ -64,7 +77,7 @@ class TalkEntry(Entry):
 class QuoteEntry(Entry):
     person = models.ForeignKey('talks.Person')
     quote = models.TextField()
-    #source = models.CharField(max_length=200)
+    source = models.CharField(max_length=200)
     
     def __unicode__(self):
         return self.person.__unicode__()

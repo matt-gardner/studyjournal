@@ -1,3 +1,8 @@
+{% extends "basetemplate.html" %}
+
+{% block title %} Topics {% endblock %}
+
+{% block content %}
 {% if topics %}
 	<ul>
 	{% for topic in topics %}
@@ -9,3 +14,4 @@
 {% endif %}
 <br><br>
 <a href="add">Add a new topic</a>
+{% endblock %}
