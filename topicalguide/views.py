@@ -1,13 +1,18 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django import forms
-from studyjournal.topicalguide.models import Topic, Entry, TalkEntry
+from studyjournal.topicalguide.models import Topic, TalkEntry
 from studyjournal.topicalguide.models import QuoteEntry, ScriptureReferenceEntry
 from studyjournal.talks.models import Person, Talk
+from datetime import datetime
 
 def index(request):
-    topics = [x for x in Topic.objects.all()]
-    topics.sort(key=lambda x: x.index_name())
+    if 'order_by' in request.GET:
+        topics = [x for x in
+                Topic.objects.order_by(request.GET['order_by'])]
+    else:
+        topics = [x for x in Topic.objects.all()]
+        topics.sort(key=lambda x: x.index_name())
     return render_to_response('topicalguide/index.html', {'topics' : topics})
 
 def topic(request, topic_name):
@@ -17,6 +22,8 @@ def topic(request, topic_name):
 def add_topic(request):
     if request.POST:
         new_topic = Topic(name=request.POST['name'],
+                subheading=request.POST['subheading'],
+                last_modified=datetime.now(),
                 notes=request.POST['notes'])
         new_topic.save()
         return HttpResponseRedirect('/topics/')
@@ -33,6 +40,7 @@ def edit_topic(request, topic_id):
         topic.name = request.POST['name']
         topic.subheading = request.POST['subheading']
         topic.notes = request.POST['notes']
+        topic.last_modified = datetime.now()
         topic.save()
         return HttpResponseRedirect('/topic/'+topic.name)
     form = AddTopicForm(instance=topic)
@@ -50,6 +58,8 @@ def add_related_topic(request, topic_name, **kwds):
         if (related_topic not in topic.related_topics.all() and
                 related_topic != topic):
             topic.related_topics.add(related_topic)
+            topic.last_modified = datetime.now()
+            topic.save()
         return HttpResponseRedirect('/topic/'+topic_name)
     page_vars = dict()
     form = RelatedTopicForm()
@@ -61,17 +71,20 @@ def add_related_topic(request, topic_name, **kwds):
 
 def add_scripture_entry(request, topic_name, **kwds):
     if request.POST:
+        topic = Topic.objects.get(name=topic_name)
         if request.POST['edit'] != 'False':
             entry = ScriptureReferenceEntry.objects.get(pk=request.POST['edit'])
             entry.notes = request.POST['notes']
             entry.reference = request.POST['reference']
         else:
             entry = ScriptureReferenceEntry(
-                    topic=Topic.objects.get(name=topic_name),
+                    topic=topic,
                     notes=request.POST['notes'],
                     reference=request.POST['reference'],
                     )
         entry.save()
+        topic.last_modified = datetime.now()
+        topic.save()
         return HttpResponseRedirect('/topic/'+topic_name)
     page_vars = dict()
     if kwds.has_key('entry_id'):
@@ -92,18 +105,21 @@ def add_scripture_entry(request, topic_name, **kwds):
 
 def add_talk_entry(request, topic_name, **kwds):
     if request.POST and request.POST['edit'] != 'Person':
+        topic = Topic.objects.get(name=topic_name)
         if request.POST['edit'] != 'False':
             entry = TalkEntry.objects.get(pk=request.POST['edit'])
             entry.notes = request.POST['notes']
             entry.quote = request.POST['quote']
         else:
             entry = TalkEntry(
-                    topic=Topic.objects.get(name=topic_name),
+                    topic=topic,
                     notes=request.POST['notes'],
                     talk=Talk.objects.get(pk=request.POST['talk']),
                     quote=request.POST['quote'],
                     )
         entry.save()
+        topic.last_modified = datetime.now()
+        topic.save()
         return HttpResponseRedirect('/topic/'+topic_name)
     page_vars = dict()
     if request.POST:
@@ -132,6 +148,7 @@ def add_talk_entry(request, topic_name, **kwds):
 
 def add_quote(request, topic_name, **kwds):
     if request.POST:
+        topic = Topic.objects.get(name=topic_name)
         if request.POST['edit'] != 'False':
             entry = QuoteEntry.objects.get(pk=request.POST['edit'])
             entry.person = Person.objects.get(pk=request.POST['person'])
@@ -140,13 +157,15 @@ def add_quote(request, topic_name, **kwds):
             entry.notes = request.POST['notes']
         else:
             entry = QuoteEntry(
-                    topic=Topic.objects.get(name=topic_name),
+                    topic=topic,
                     person=Person.objects.get(pk=request.POST['person']),
                     quote=request.POST['quote'],
                     source=request.POST['source'],
                     notes=request.POST['notes'],
                     )
         entry.save()
+        topic.last_modified = datetime.now()
+        topic.save()
         return HttpResponseRedirect('/topic/'+topic_name)
     page_vars = dict()
     if kwds.has_key('entry_id'):
@@ -170,7 +189,7 @@ def add_quote(request, topic_name, **kwds):
 class AddTopicForm(forms.ModelForm):
     class Meta:
         model = Topic
-        exclude = ['related_topics']
+        exclude = ['related_topics', 'last_modified']
 
 class AddScriptureForm(forms.ModelForm):
     topic = forms.CharField(label='Topic',

@@ -5,80 +5,136 @@
 {% block content %}
 <h1>{{ topic.name }}</h1>
 {% if topic.subheading %}
-<h2>{{ topic.subheading }}</h2>
+	<h2>{{ topic.subheading }}</h2>
 {% endif %}
-<h3>See also</h3>
-{% for r_topic in topic.related_topics.all %}
-<a href="/topic/{{ r_topic }}">{{ r_topic.name }}</a>
-<br>
-{% endfor %}
-<br>
-<a href="addrt">Add a related topic</a>
 <h3> Notes </h3>
-{{ topic.notes }}
-<br>
+{% if topic.notes %}
+	{{ topic.notes }}
+	<br>
+	<br>
+{% endif %}
 <a href="/topics/edit{{ topic.id}}">Edit name and notes</a>
-<h3> Talks </h3>
-	<ul>
-	{% for talk in topic.talk_set %}
-	{% if talk.notes %}
-	<li class=notes>
-	{% else %}
-	<li class=no_notes>
-	{% endif %}
-	{% if talk.quote %}
-	{{ talk.quote }}
-	<br> --
-	{% endif %}
-	<a href='/talk/{{ talk.talk.id }}'>{{ talk }}</a>
-	<a href='t{{ talk.id }}'>Edit</a>
-	{% if talk.notes %}
-	<ul><li>{{ talk.notes }}</li></ul>
-	{% endif %}
-	</li>
-	{% endfor %}
-	</ul>
-	<br>
-	<a href='addt'>Add a talk</a>
-<div class=scriptures>
-<h3> Scripture References </h3>
-	<ul>
-	{% for ref in topic.scripture_set %}
-	{% if ref.notes %}
-	<li class=notes>
-	{% else %}
-	<li class=no_notes>
-	{% endif %}
-	{{ ref }} <a href=sr{{ ref.id }}>Edit</a>
-	{% if ref.notes %}
-	<ul><li>{{ ref.notes }}</li></ul>
-	{% endif %}
-	</li>
-	{% endfor %}
-	</ul>
-	<br>
-	<a href='addsr'>Add a scripture reference</a>
-</div>
-<h3> Quotes </h3>
-	<ul>
-	{% for quote in topic.quote_set %}
+<table class=talks id=talks>
+	<col width=85%>
+	<col width=7.5%>
+	<col width=7.5%>
+	<thead>
+		<tr>
+			<th>Talks</th>
+			<th colspan=2 onclick="toggle_all_notes('talks')">Notes</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for talk in topic.talkentry_set.all %}
+		{% if talk.notes %}
+		<tr class=hide_notes id=talk{{talk.talk.id}} onclick="toggle_notes('talk{{ talk.talk.id }}')">
+		{% else %}
+		<tr class=no_notes>
+		{% endif %}
+			<td>
+			{% if talk.quote %}
+			{{ talk.quote }}
+			<br> --
+			{% endif %}
+			<a href='/talk/{{ talk.talk.id }}'>{{ talk }}</a>
+			{% if talk.notes %}
+			<ul><li>{{ talk.notes }}</li></ul></td>
+			<td class=notes>Notes</td>
+			{% else %}
+			<td></td></td>
+			{% endif %}
+			<td><a href='t{{ talk.id }}'>Edit</a></td>
+		</tr>
+		{% endfor %}
+		<tr>
+			<td><a href='addt'>Add a talk</a></td><td></td><td></td>
+		</tr>
+	</tbody>
+</table>
+<table class=scriptures id=scriptures>
+	<col width=85%>
+	<col width=7.5%>
+	<col width=7.5%>
+	<thead>
+		<tr>
+			<th>Scripture References</th>
+			<th colspan=2 onclick="toggle_all_notes('scriptures')">Notes</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for ref in topic.scripture_references %}
+		{% if ref.notes %}
+		<tr class=hide_notes id=sr{{ref.id}} onclick="toggle_notes('sr{{ref.id}}')">
+		{% else %}
+		<tr class=no_notes>
+		{% endif %}
+			{% if ref.notes %}
+			<td> {{ ref }} <ul><li>{{ ref.notes }}</li></ul></td>
+			<td class=notes>Notes</td>
+			{% else %}
+			<td> {{ ref }} </td><td></td>
+			{% endif %}
+			<td><a href=sr{{ ref.id }}>Edit</a></td>
+		</tr>
+		{% endfor %}
+		<tr>
+			<td><a href='addsr'>Add a scripture reference</a></td>
+			<td></td><td></td>
+		</tr>
+	</tbody>
+</table>
+<table class=quotes id=quotes>
+	<col width=85%>
+	<col width=7.5%>
+	<col width=7.5%>
+	<thead>
+		<tr>
+			<th>Quotes</th>
+			<th colspan=2 onclick="toggle_all_notes('quotes')">Notes</th>
+		</tr>
+	</thead>
+	<tbody>
+	{% for quote in topic.quoteentry_set.all %}
 	{% if quote.notes %}
-	<li class=notes>
+	<tr class=hide_notes id=quote{{quote.id}} onclick="toggle_notes('quote{{quote.id}}')">
 	{% else %}
-	<li class=no_notes>
+	<tr class=no_notes>
 	{% endif %}
+	<td>
 	{{ quote.quote }} 
 	<br> -- <a href='/person/{{ quote.person.id }}'>{{ quote.person.name }},</a>
 	{{ quote.source }}
-	<a href=q{{ quote.id }}>Edit</a>
 	{% if quote.notes %}
-	<ul><li>{{ quote.notes }}</li></ul>
+	<ul><li>{{ quote.notes }}</li></ul></td>
+	<td class=notes>Notes</td>
+	{% else %}
+	<td></td></td>
 	{% endif %}
-	</li>
+	<td><a href=q{{ quote.id }}>Edit</a></td>
+	</tr>
 	{% endfor %}
-	</ul>
-	<br>
-	<a href='addq'>Add a quote</a>
+	<tr>
+		<td><a href='addq'>Add a quote</a></td><td></td><td></td>
+	</tr>
+	</tbody>
+</table>
+<table class=related>
+	<thead>
+		<tr>
+			<th>See Also</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for r_topic in topic.related_topics.all %}
+			<tr>
+				<td><a href="/topic/{{ r_topic }}">{{ r_topic.name }}</a></td>
+			</tr>
+		{% endfor %}
+		<tr>
+			<td><a href="addrt">Add a related topic</a></td>
+		</tr>
+	</tbody>
+</table>
 <br>
 <br>
 {% endblock %}

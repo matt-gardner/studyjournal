@@ -96,6 +96,7 @@ def main():
                 talk = Talk(speaker=sid, speakername=name, date=d, title=title, 
                         text=text, type=t, externallink=link)
                 print 'Added',name+',',title
+                talk.save()
                 continue
             else:
                 name = input[:-1]

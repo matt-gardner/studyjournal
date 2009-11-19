@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib import admin
 admin.autodiscover()
 
-topicname = '(?P<topic_name>[\w,\:\s]+)'
+topicname = '(?P<topic_name>[\'\w,\:\s]+)'
 
 urlpatterns = patterns('',
     (r'^$', 'studyjournal.talks.views.index'),
