@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
 from studyjournal.talks.models import Talk, Person, Calling
-from studyjournal.topicalguide.models import Topic, Entry, TalkEntry
-from studyjournal.topicalguide.models import QuoteEntry
+from studyjournal.topicalguide.models import Topic, TalkEntry, QuoteEntry
 from studyjournal.topicalguide.models import ScriptureReferenceEntry
-from datetime import date
+from datetime import date, datetime
 from name import split_name
 from optparse import OptionParser
 
@@ -177,13 +176,28 @@ def create_topics():
         if lines[i][:7] == 'Topic: ':
             name = lines[i][7:-1]
             i += 1
+            subheading = lines[i][12:-1]
+            i += 1
+            indexname = lines[i][12:-1]
+            i += 1
+            date_str = lines[i][15:-1]
+            fields = date_str.split(', ')
+            year = int(fields[0])
+            month = int(fields[1])
+            day = int(fields[2])
+            hour = int(fields[3])
+            minute = int(fields[4])
+            second = int(fields[5])
+            dt = datetime(year, month, day, hour, minute, second)
+            i += 1
             notes = ''
             while lines[i][:9] != 'Entries: ':
                 if lines[i][:7] == 'Notes: ':
                     lines[i] = lines[i][7:]
                 notes += lines[i]
                 i += 1
-            topic = Topic(name=name, notes=notes[:-1])
+            topic = Topic(name=name, subheading=subheading, last_modified=dt,
+                    indexname=indexname, notes=notes[:-1])
             topic.save()
             continue
         if lines[i][:9] == 'Entries: ':
@@ -258,6 +272,8 @@ def get_q_entry(lines, i, topic):
     sid = Person.objects.get(firstname=firstname, middlename=middlename,
             lastname=lastname, suffix=suffix)
     i += 1
+    source = lines[i][8:-1]
+    i += 1
     notes = ''
     while (lines[i][:11] != 'Scripture: ' and
             lines[i][:6] != 'Talk: ' and
@@ -268,7 +284,7 @@ def get_q_entry(lines, i, topic):
         notes += lines[i]
         i += 1
     entry = QuoteEntry(topic=topic, quote=quote[:-1], person=sid,
-            notes=notes[:-1])
+            notes=notes[:-1], source=source)
     entry.save()
     return i
 

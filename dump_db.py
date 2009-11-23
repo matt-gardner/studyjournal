@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 from studyjournal.talks.models import Person, Talk
-from studyjournal.topicalguide.models import Topic, Entry, TalkEntry
-from studyjournal.topicalguide.models import QuoteEntry
+from studyjournal.topicalguide.models import Topic, TalkEntry, QuoteEntry
 from studyjournal.topicalguide.models import ScriptureReferenceEntry
 from subprocess import Popen
 from month import make_month_str
@@ -119,34 +118,31 @@ def output_topics():
     f = open('topics.txt', 'w')
     for topic in Topic.objects.all().order_by('name'):
         f.write('Topic: ' + topic.name + '\n')
+        f.write('Subheading: ' + topic.subheading + '\n')
+        f.write('Index name: ' + topic.indexname + '\n')
+        last_modified_string = str(topic.last_modified.year) + ', '
+        last_modified_string += str(topic.last_modified.month) + ', '
+        last_modified_string += str(topic.last_modified.day) + ', '
+        last_modified_string += str(topic.last_modified.hour) + ', '
+        last_modified_string += str(topic.last_modified.minute) + ', '
+        last_modified_string += str(topic.last_modified.second)
+        f.write('Last Modified: ' + last_modified_string + '\n')
         f.write('Notes: ' + topic.notes + '\n')
         f.write('Entries: \n')
-        for entry in topic.entry_set.all():
-            try:
-                sr_entry = entry.scripturereferenceentry
-                f.write('Scripture: ' + sr_entry.reference + '\n')
-                f.write('Notes: ' + sr_entry.notes + '\n')
-                continue
-            except ScriptureReferenceEntry.DoesNotExist:
-                pass
-            try:
-                q_entry = entry.quoteentry
-                f.write('Quote: ' + q_entry.quote + '\n')
-                f.write('Person: ' + q_entry.person + '\n')
-                f.write('Notes: ' + q_entry.notes + '\n')
-                continue
-            except QuoteEntry.DoesNotExist:
-                pass
-            try:
-                t_entry = entry.talkentry
-                f.write('Talk: ' + t_entry.talk.title.encode('utf-8') + '\n')
-                f.write('Speaker: ' +
-                        t_entry.talk.speaker.name().encode('utf-8') + '\n')
-                f.write('Quote: ' + t_entry.quote.encode('utf-8') + '\n')
-                f.write('Notes: ' + t_entry.notes + '\n')
-                continue
-            except TalkEntry.DoesNotExist:
-                pass
+        for sr_entry in topic.scripturereferenceentry_set.all():
+            f.write('Scripture: ' + sr_entry.reference + '\n')
+            f.write('Notes: ' + sr_entry.notes + '\n')
+        for q_entry in topic.quoteentry_set.all():
+            f.write('Quote: ' + q_entry.quote.encode('utf-8') + '\n')
+            f.write('Person: ' + q_entry.person.name().encode('utf-8') + '\n')
+            f.write('Source: ' + q_entry.source.encode('utf-8') + '\n')
+            f.write('Notes: ' + q_entry.notes + '\n')
+        for t_entry in topic.talkentry_set.all():
+            f.write('Talk: ' + t_entry.talk.title.encode('utf-8') + '\n')
+            f.write('Speaker: ' +
+                    t_entry.talk.speaker.name().encode('utf-8') + '\n')
+            f.write('Quote: ' + t_entry.quote.encode('utf-8') + '\n')
+            f.write('Notes: ' + t_entry.notes + '\n')
         f.write('\n')
     f.close()
     

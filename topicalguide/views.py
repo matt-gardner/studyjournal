@@ -7,12 +7,10 @@ from studyjournal.talks.models import Person, Talk
 from datetime import datetime
 
 def index(request):
+    ordering = 'indexname'
     if 'order_by' in request.GET:
-        topics = [x for x in
-                Topic.objects.order_by(request.GET['order_by'])]
-    else:
-        topics = [x for x in Topic.objects.all()]
-        topics.sort(key=lambda x: x.index_name())
+        ordering = request.GET['order_by']
+    topics = Topic.objects.order_by(ordering)
     return render_to_response('topicalguide/index.html', {'topics' : topics})
 
 def topic(request, topic_name):
@@ -23,8 +21,9 @@ def add_topic(request):
     if request.POST:
         new_topic = Topic(name=request.POST['name'],
                 subheading=request.POST['subheading'],
+                indexname=request.POST['indexname'],
                 last_modified=datetime.now(),
-                notes=request.POST['notes'])
+                notes=request.POST['notes'].strip())
         new_topic.save()
         return HttpResponseRedirect('/topics/')
     form = AddTopicForm()
@@ -39,7 +38,8 @@ def edit_topic(request, topic_id):
     if request.POST:
         topic.name = request.POST['name']
         topic.subheading = request.POST['subheading']
-        topic.notes = request.POST['notes']
+        topic.indexname = request.POST['indexname']
+        topic.notes = request.POST['notes'].strip()
         topic.last_modified = datetime.now()
         topic.save()
         return HttpResponseRedirect('/topic/'+topic.name)
@@ -74,12 +74,12 @@ def add_scripture_entry(request, topic_name, **kwds):
         topic = Topic.objects.get(name=topic_name)
         if request.POST['edit'] != 'False':
             entry = ScriptureReferenceEntry.objects.get(pk=request.POST['edit'])
-            entry.notes = request.POST['notes']
+            entry.notes = request.POST['notes'].strip()
             entry.reference = request.POST['reference']
         else:
             entry = ScriptureReferenceEntry(
                     topic=topic,
-                    notes=request.POST['notes'],
+                    notes=request.POST['notes'].strip(),
                     reference=request.POST['reference'],
                     )
         entry.save()
@@ -108,12 +108,12 @@ def add_talk_entry(request, topic_name, **kwds):
         topic = Topic.objects.get(name=topic_name)
         if request.POST['edit'] != 'False':
             entry = TalkEntry.objects.get(pk=request.POST['edit'])
-            entry.notes = request.POST['notes']
+            entry.notes = request.POST['notes'].strip()
             entry.quote = request.POST['quote']
         else:
             entry = TalkEntry(
                     topic=topic,
-                    notes=request.POST['notes'],
+                    notes=request.POST['notes'].strip(),
                     talk=Talk.objects.get(pk=request.POST['talk']),
                     quote=request.POST['quote'],
                     )
@@ -154,14 +154,14 @@ def add_quote(request, topic_name, **kwds):
             entry.person = Person.objects.get(pk=request.POST['person'])
             entry.quote = request.POST['quote']
             entry.source = request.POST['source']
-            entry.notes = request.POST['notes']
+            entry.notes = request.POST['notes'].strip()
         else:
             entry = QuoteEntry(
                     topic=topic,
                     person=Person.objects.get(pk=request.POST['person']),
                     quote=request.POST['quote'],
                     source=request.POST['source'],
-                    notes=request.POST['notes'],
+                    notes=request.POST['notes'].strip(),
                     )
         entry.save()
         topic.last_modified = datetime.now()

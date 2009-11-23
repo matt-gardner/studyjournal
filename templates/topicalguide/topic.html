@@ -69,10 +69,10 @@
 		<tr class=no_notes>
 		{% endif %}
 			{% if ref.notes %}
-			<td> {{ ref }} <ul><li>{{ ref.notes }}</li></ul></td>
+			<td> {{ ref.get_link }} <ul><li>{{ ref.notes }}</li></ul></td>
 			<td class=notes>Notes</td>
 			{% else %}
-			<td> {{ ref }} </td><td></td>
+			<td> {{ ref.get_link }} </td><td></td>
 			{% endif %}
 			<td><a href=sr{{ ref.id }}>Edit</a></td>
 		</tr>
