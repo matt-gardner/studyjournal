@@ -6,21 +6,60 @@
 <table class="topics">
 	<thead>
 		<tr>
-			<th scope="col"><a href="/topics/">Topic Name</a></th>
-			<th scope="col">Scriptures</th>
-			<th scope="col">Talks</th>
-			<th scope="col">Quotes</th>
-			<th scope="col">
-			<a href="/topics/?order_by=-last_modified">Last Modified</a></th>
+			{% ifnotequal ordering "indexname" %}
+				<th scope="col">
+					<a href="/topics/?order_by=indexname">Topic Name</a>
+				</th>
+			{% else %}
+				<th scope="col">
+					<a href="/topics/?order_by=-indexname">Topic Name</a>
+				</th>
+			{% endifnotequal %}
+			{% ifnotequal ordering "-scriptures" %}
+				<th scope="col">
+					<a href="/topics/?order_by=-scriptures">Scriptures</a>
+				</th>
+			{% else %}
+				<th scope="col">
+					<a href="/topics/?order_by=scriptures">Scriptures</a>
+				</th>
+			{% endifnotequal %}
+			{% ifnotequal ordering "-talks" %}
+				<th scope="col">
+					<a href="/topics/?order_by=-talks">Talks</a>
+				</th>
+			{% else %}
+				<th scope="col">
+					<a href="/topics/?order_by=talks">Talks</a>
+				</th>
+			{% endifnotequal %}
+			{% ifnotequal ordering "-quotes" %}
+				<th scope="col">
+					<a href="/topics/?order_by=-quotes">Quotes</a>
+				</th>
+			{% else %}
+				<th scope="col">
+					<a href="/topics/?order_by=quotes">Quotes</a>
+				</th>
+			{% endifnotequal %}
+			{% ifnotequal ordering "-last_modified" %}
+				<th scope="col">
+					<a href="/topics/?order_by=-last_modified">Last Modified</a>
+				</th>
+			{% else %}
+				<th scope="col">
+					<a href="/topics/?order_by=last_modified">Last Modified</a>
+				</th>
+			{% endifnotequal %}
 		</tr>
 	</thead>
 	<tbody>
 		{% for topic in topics %}
 			<tr>
 				<td><a href="../topic/{{ topic.name }}">{{ topic.indexname }}</a></td>
-				<td>{{ topic.num_scriptures }}</td>
-				<td>{{ topic.num_talks }}</td>
-				<td>{{ topic.num_quotes }}</td>
+				<td>{{ topic.scripturereferenceentry_set.all|length }}</td>
+				<td>{{ topic.talkentry_set.all|length }}</td>
+				<td>{{ topic.quoteentry_set.all|length }}</td>
 				<td>{{ topic.last_modified|timesince }} ago</td>
 			</tr>
 		{% endfor %}

@@ -1,0 +1,69 @@
+{% extends "basetemplate.html" %}
+
+{% block title %} Callings {% endblock %}
+
+{% block content %}
+
+<form action="" method="get">
+	<table>
+		<col width=5%>
+		<col width=5%>
+		<tr>
+			<td> Year: </td>
+			<td><input type="text" name="year" value={{year}} /></td>
+		</tr>
+		<tr>
+			<td> Month: </td>
+			<td><input type="text" name="month" value={{month}} /></td>
+		</tr>
+		<tr>
+			<td> Day: </td>
+			<td><input type="text" name="day" value={{day}} /></td>
+		</tr>
+		<tr>
+			<td><input type="submit" value="Go to Date" /></td><td></td>
+		</tr>
+	</table>
+</form>
+
+<table>
+	<thead>
+		<th>
+			First Presidency
+		</th>
+	</thead>
+	<tbody>
+		{% if callings.president %}
+		<tr>
+			<td><a href="/person/{{callings.president.id}}">{{ callings.president }}</a></td>
+		</tr>
+		{% endif %}
+		{% if callings.first_counselor %}
+		<tr>
+			<td><a href="/person/{{callings.first_counselor.id}}">{{ callings.first_counselor }}</a></td>
+		</tr>
+		{% endif %}
+		{% if callings.second_counselor %}
+		<tr>
+			<td><a href="/person/{{callings.second_counselor.id}}">{{ callings.second_counselor }}</a></td>
+		</tr>
+		{% endif %}
+	</tbody>
+</table>
+
+<table>
+	<thead>
+		<th>
+			Apostles
+		</th>
+	</thead>
+	<tbody>
+		{% for apostle in callings.apostles %}
+		<tr>
+			<td><a href="/person/{{apostle.id}}">{{ apostle }}</a></td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}

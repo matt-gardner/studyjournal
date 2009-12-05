@@ -17,65 +17,13 @@ class Topic(models.Model):
     def __unicode__(self):
         return self.name
 
-    #def talk_set(self):
-        #talk_set = []
-        #for entry in self.entry_set.all():
-            #talk_entry = None
-            #try:
-                #talk_entry = entry.talkentry
-            #except TalkEntry.DoesNotExist:
-                #continue
-            #if talk_entry:
-                #talk_set.append(talk_entry)
-        #talk_set.sort(key=lambda x: (x.talk.speaker.name(), x.talk.__unicode__()))
-        #return talk_set
-
-    #def scripture_set(self):
-        #scripture_set = []
-        #for entry in self.entry_set.all():
-            #scripture_entry = None
-            #try:
-                #scripture_entry = entry.scripturereferenceentry
-            #except ScriptureReferenceEntry.DoesNotExist:
-                #continue
-            #if scripture_entry:
-                #scripture_set.append(scripture_entry)
-        #scripture_set.sort(key=lambda x: split_for_sorting(x.reference))
-        #return scripture_set
-
-    #def quote_set(self):
-        #quote_set = []
-        #for entry in self.entry_set.all():
-            #quote_entry = None
-            #try:
-                #quote_entry = entry.quoteentry
-                #quote_set.append(quote_entry)
-            #except QuoteEntry.DoesNotExist:
-                #pass
-        #return quote_set
-
     def num_entries(self):
         return self.num_talks() + self.num_scriptures() + self.num_quotes()
-
-    def num_talks(self):
-        return len(self.talkentry_set.all())
-
-    def num_scriptures(self):
-        return len(self.scripturereferenceentry_set.all())
-
-    def num_quotes(self):
-        return len(self.quoteentry_set.all())
 
     def scripture_references(self):
         refs = list(self.scripturereferenceentry_set.all())
         refs.sort(key=lambda x: split_for_sorting(x.reference))
         return refs
-
-    def index_name(self):
-        if self.name[:4] == 'The ':
-            return self.name[4:]+', The'
-        else:
-            return self.name
 
 
 class TalkEntry(models.Model):

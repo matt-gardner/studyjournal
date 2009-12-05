@@ -55,15 +55,14 @@ table
 	font-family:"Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
 	font-size:12px;
 	background:#fff;
-	width:80%;
+	width:100%;
 	border-collapse:collapse;
 	text-align:left;
-	margin:20px;
-}
-table.scriptures, table.talks, table.quotes, table.related
-{
 	margin:0px;
-	width:100%;
+}
+table.topicsfortalk
+{
+	width:40%;
 }
 table a:link, table a:visited, a:link, a:visited
 {
@@ -109,9 +108,7 @@ table tbody tr.show_notes ul
 	display:block;
 	margin:4px;
 }
-/*
-td.notes
+table.scriptures_hide tbody
 {
-	list-style-image: url("/site_media/arrow.jpg");
+	display:none;
 }
-*/

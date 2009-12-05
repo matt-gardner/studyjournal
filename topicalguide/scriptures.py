@@ -3,8 +3,8 @@
 books = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua',
         'Judges', 'Ruth', '1 Samuel', '2 Samuel', '1 Kings', '2 Kings',
         '1 Chronicles', '2 Chronicles', 'Ezra', 'Nehemiah', 'Esther', 'Job',
-        'Psalms', 'Proverbs', 'Ecclesiastes', 'The Song of Solomon', 'Isaiah',
-        'Jeremiah', 'Lamentations', 'Ezekial', 'Daniel', 'Hosea', 'Joel',
+        'Psalms', 'Proverbs', 'Ecclesiastes', 'Song of Solomon', 'Isaiah',
+        'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel',
         'Amos', 'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk', 'Zephaniah',
         'Haggai', 'Zechariah', 'Malachi', 'Matthew', 'Mark', 'Luke', 'John',
         'Acts', 'Romans', '1 Corinthians', '2 Corinthians', 'Galatians',
@@ -56,33 +56,108 @@ def split_for_sorting(reference):
             return (i, chapter, verse, rest)
     return (i+1, chapter, verse, rest)
 
+
 def get_link(reference):
-    ref= clean_reference(reference)
-    items = ref.split()
-    for i, item in enumerate(items):
-        if ':' in item or (item.isdigit() and i != 0):
-            ref_book = ' '.join(items[:i])
-            chverse = item.split(':')
-            chapter = int(chverse[0])
-            verse = ''
-            if len(chverse) > 1:
-                j = 0
-                while j < len(chverse[1]) and chverse[1][j].isdigit():
-                    j += 1
-                verse = int(chverse[1][:j])
-            rest = ' '.join(items[i:])
-            break
+    return get_link_part(reference, '', '')
+
+
+def get_link_part(reference, book, chapter):
+    link = ''
+    after_link = ''
+    if '(' in reference:
+        substring = reference[reference.find('(')-1:reference.find(')')+1]
+        ref = reference.replace(substring,'')
     else:
-        return reference
-    for i, book in enumerate(books):
-        if ref_book == book:
+        ref = reference
+    items = ref.split()
+    i = 0
+    if book and chapter:
+        if ',' in ref:
+            verse = ref[:ref.find(',')+1]
+        else:
+            verse = ref
+    if not book:
+        book = items[i]
+        i += 1
+        while book not in books:
+            if i >= len(items):
+                return ref
+            book += ' ' + items[i]
+            i += 1
+    if not chapter:
+        if ':' in items[i]:
+            try:
+                chapter, verse = items[i].split(':')
+            except ValueError:
+                chverse = items[i].split(':')
+                chapter = chverse[0]
+                verse = chverse[1]
+                if '-' in verse:
+                    verse = verse.split('-')[0]
+        else:
+            chapter = items[i]
+            verse = ''
+    i += 1
+    if ',' in chapter:
+        chapter = chapter.replace(',','')
+        reference = reference[:reference.find(',')+1]
+        reference = reference.replace(',',', ')
+        ref = ' '.join(items[i:])
+        if items[i][0].isdigit():
+            after_link = get_link_part(ref, book, '')
+        else:
+            after_link = get_link_part(ref, '', '')
+    if '-' in verse:
+        verserange = verse
+        verse = verse.split('-')[0]
+    else:
+        verserange = verse
+    if ',' in verserange:
+        verserange = verserange.replace(',','')
+        reference = ' '.join(items[:i])
+        reference = reference.replace(',',', ')
+        verse = verse.replace(',','')
+        ref = ' '.join(items[i:])
+        if items[i][0].isdigit():
+            if ':' in items[i]:
+                after_link += get_link_part(ref, book, '')
+            else:
+                verserange += ','+items[i]
+                if len(items) > i+1 and items[i+1][0].isdigit():
+                    verserange += items[i+1]
+                reference = reference + ref
+                #after_link += get_link_part(ref, book, chapter)
+        else:
+            after_link += get_link_part(ref, '', '')
+    link += make_link(reference, book, chapter, verserange, verse)
+    link += after_link
+    return link
+
+
+def make_link(ref, book, chapter, verserange, verse):
+    for i, b in enumerate(books):
+        if book == b:
             link = '<a href="http://scriptures.lds.org/en/'+links[i]+'/'+str(chapter)
-            if verse:
-                link += '#'+str(verse)
-            link += '">'+reference+'</a>'
+            if verserange:
+                link += '/'+verserange+'#'+verse
+            link += '">'+ref+'</a>'
             return link
-    return reference
+    return ref
 
 
+def get_book(reference):
+    reference = clean_reference(reference)
+    items = reference.split()
+    i = 0
+    book = items[i]
+    i += 1
+    while book not in books:
+        if i >= len(items):
+            return 'Bad'
+        book += ' ' + items[i]
+        i += 1
+    return book
+
+        
 
 # vim: et sw=4 sts=4

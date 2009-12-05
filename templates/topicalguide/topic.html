@@ -9,9 +9,7 @@
 {% endif %}
 <h3> Notes </h3>
 {% if topic.notes %}
-	{{ topic.notes }}
-	<br>
-	<br>
+	{{ topic.notes|linebreaks }}
 {% endif %}
 <a href="/topics/edit{{ topic.id}}">Edit name and notes</a>
 <table class=talks id=talks>

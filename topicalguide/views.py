@@ -5,17 +5,58 @@ from studyjournal.topicalguide.models import Topic, TalkEntry
 from studyjournal.topicalguide.models import QuoteEntry, ScriptureReferenceEntry
 from studyjournal.talks.models import Person, Talk
 from datetime import datetime
+from scriptures import get_book, split_for_sorting, books
 
 def index(request):
+    allowed_orderings = ['indexname', '-indexname', 'last_modified', '-last_modified']
     ordering = 'indexname'
     if 'order_by' in request.GET:
         ordering = request.GET['order_by']
-    topics = Topic.objects.order_by(ordering)
-    return render_to_response('topicalguide/index.html', {'topics' : topics})
+    if ordering in allowed_orderings:
+        topics = Topic.objects.order_by(ordering)
+    else:
+        topics = list(Topic.objects.all())
+        if ordering == 'scriptures':
+            topics.sort(key=lambda x:
+                    (len(x.scripturereferenceentry_set.all()), x.indexname))
+        elif ordering == '-scriptures':
+            topics.sort(key=lambda x:
+                    (-len(x.scripturereferenceentry_set.all()), x.indexname))
+        elif ordering == 'talks':
+            topics.sort(key=lambda x:
+                    (len(x.talkentry_set.all()), x.indexname))
+        elif ordering == '-talks':
+            topics.sort(key=lambda x:
+                    (-len(x.talkentry_set.all()), x.indexname))
+        elif ordering == 'quotes':
+            topics.sort(key=lambda x:
+                    (len(x.quoteentry_set.all()), x.indexname))
+        elif ordering == '-quotes':
+            topics.sort(key=lambda x:
+                    (-len(x.quoteentry_set.all()), x.indexname))
+    return render_to_response('topicalguide/index.html',
+            {'topics' : topics, 'ordering': ordering})
 
 def topic(request, topic_name):
     topic = get_object_or_404(Topic, name=topic_name)
     return render_to_response('topicalguide/topic.html', {'topic' : topic})
+
+def scriptures(request):
+    scriptures = dict()
+    for entry in ScriptureReferenceEntry.objects.all():
+        book = get_book(entry.reference)
+        if book not in scriptures:
+            scriptures[book] = []
+        scriptures[book].append(entry)
+    scripture_set = ScriptureSet()
+    for book in books:
+        if book in scriptures:
+            scriptures[book].sort(key=lambda x: split_for_sorting(x.reference))
+            b = Book(book)
+            b.refs = scriptures[book]
+            scripture_set.books.append(b)
+    return render_to_response('topicalguide/scriptures.html',
+            {'scriptures' : scripture_set})
 
 def add_topic(request):
     if request.POST:
@@ -71,6 +112,7 @@ def add_related_topic(request, topic_name, **kwds):
 
 def add_scripture_entry(request, topic_name, **kwds):
     if request.POST:
+        topic = Topic.objects.get(name=topic_name)
         topic = Topic.objects.get(name=topic_name)
         if request.POST['edit'] != 'False':
             entry = ScriptureReferenceEntry.objects.get(pk=request.POST['edit'])
@@ -154,7 +196,6 @@ def add_quote(request, topic_name, **kwds):
             entry.person = Person.objects.get(pk=request.POST['person'])
             entry.quote = request.POST['quote']
             entry.source = request.POST['source']
-            entry.notes = request.POST['notes'].strip()
         else:
             entry = QuoteEntry(
                     topic=topic,
@@ -236,5 +277,18 @@ class AddTalkForm(forms.ModelForm):
 class RelatedTopicForm(forms.Form):
     related_topic = forms.ModelChoiceField(Topic.objects.all(), label='Topic',
             empty_label=None)
+
+class ScriptureSet(object):
+    def __init__(self):
+        self.books = []
+
+class Book(object):
+    def __init__(self, name):
+        self.name = name
+        self.refs = []
+
+    def num_refs(self):
+        return len(self.refs)
+
 
 

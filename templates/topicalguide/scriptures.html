@@ -1,0 +1,30 @@
+{% extends "basetemplate.html" %}
+
+{% block title %} Scriptures {% endblock %}
+
+{% block content %}
+
+{% for book in scriptures.books %}
+<table class="scriptures_hide" id="{{ book.name }}">
+	<col width=30%>
+	<col width=70%>
+	<thead>
+		<tr onclick="toggle_scriptures('{{ book.name }}')">
+			<th colspan=2>{{ book.name }} ({{ book.num_refs}})</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for ref in book.refs %}
+		<tr>
+			<td>{{ref.get_link}}</td>
+			<td><a href="/topic/{{ref.topic.name}}">{{ref.topic.name}}</a></td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endfor %}
+
+<br><br>
+
+
+{% endblock %}

@@ -32,10 +32,6 @@ class Talk(models.Model):
     def pretty(self):
         return self.title+', '+str(self.date)+', '+self.type
 
-    def htmltext(self):
-        return SafeString('<p>'+\
-                self.text.replace('\n','</p><p>').encode('utf-8')+'</p>')
-
     def date_string(self):
         return str(self.date)
 

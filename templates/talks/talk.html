@@ -9,7 +9,30 @@
 <h1>{{ talk.speaker.name }}</h1>
 {% endif %}
 <h3>{{ talk.date }}</h3>
-<h3>{{ talk.type }}</h3>
+<h3>{{ talk.get_type_display }}</h3>
+<table class="topicsfortalk">
+	<col width=40%>
+	<thead>
+		<th>Topics</th>
+	</thead>
+	<tbody>
+		{% for entry in talk.talkentry_set.all %}
+		<tr>
+			<td>
+				<a href="/topic/{{ entry.topic.name }}">{{ entry.topic.name }}</a>
+			</td>
+		</tr>
+		{% endfor %}
+		<tr>
+			<td>
+				<form method="post" action="addtotopic">
+				{{ topicform }}
+				<input type="submit" name="submit" value="Add to topic" />
+				</form>
+			</td>
+		</tr>
+	</tbody>
+</table>
 <h3>Title: {{ talk.title }}</h3>
-{{ talk.htmltext }} 
+{{ talk.text|linebreaks }} 
 {% endblock %}

@@ -25,3 +25,15 @@ function toggle_all_notes(table_name)
 		}
 	}
 }
+function toggle_scriptures(book)
+{
+	var table = document.getElementById(book);
+	if (table.className == 'scriptures_hide')
+	{
+		table.className = 'scriptures_show';
+	}
+	else
+	{
+		table.className = 'scriptures_hide';
+	}
+}
