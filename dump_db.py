@@ -131,7 +131,7 @@ def output_topics():
         f.write('Entries: \n')
         for sr_entry in topic.scripturereferenceentry_set.all():
             f.write('Scripture: ' + sr_entry.reference + '\n')
-            f.write('Notes: ' + sr_entry.notes + '\n')
+            f.write('Notes: ' + sr_entry.notes.encode('utf-8') + '\n')
         for q_entry in topic.quoteentry_set.all():
             f.write('Quote: ' + q_entry.quote.encode('utf-8') + '\n')
             f.write('Person: ' + q_entry.person.name().encode('utf-8') + '\n')
@@ -144,6 +144,12 @@ def output_topics():
             f.write('Quote: ' + t_entry.quote.encode('utf-8') + '\n')
             f.write('Notes: ' + t_entry.notes + '\n')
         f.write('\n')
+
+    f.write('Related Topics: \n')
+    for topic in Topic.objects.all().order_by('name'):
+        for t in topic.related_topics.all():
+            f.write(topic.name + ' === ' + t.name + '\n')
+    f.write('\n')
     f.close()
     
 

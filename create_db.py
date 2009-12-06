@@ -209,6 +209,14 @@ def create_topics():
                     i = get_t_entry(lines, i, topic)
                 if lines[i][:7] == 'Quote: ':
                     i = get_q_entry(lines, i, topic)
+        if lines[i][:16] == 'Related Topics: ':
+            i += 1
+            while lines[i] != '\n':
+                t1, t2 = lines[i][:-1].split(' === ')
+                t1 = Topic.objects.get(name=t1)
+                t2 = Topic.objects.get(name=t2)
+                t1.related_topics.add(t2)
+                i += 1
         i += 1
 
 
