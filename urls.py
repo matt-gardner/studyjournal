@@ -10,6 +10,7 @@ topicname = '(?P<topic_name>[\'\w,\:\s]+)'
 urlpatterns = patterns('',
     (r'^$', 'studyjournal.talks.views.index'),
     (r'^person/(?P<person_id>\d+)/$', 'studyjournal.talks.views.person'),
+    (r'^person/(?P<person_id>\d+)/edit$', 'studyjournal.talks.views.edit_person'),
     (r'^talk/(?P<talk_id>\d+)/$', 'studyjournal.talks.views.talk'),
     (r'^talk/(?P<talk_id>\d+)/addtotopic$',
             'studyjournal.talks.views.add_talk_to_topic'),

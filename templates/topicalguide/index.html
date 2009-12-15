@@ -7,47 +7,47 @@
 	<thead>
 		<tr>
 			{% ifnotequal ordering "indexname" %}
-				<th scope="col">
+				<th>
 					<a href="/topics/?order_by=indexname">Topic Name</a>
 				</th>
 			{% else %}
-				<th scope="col">
+				<th>
 					<a href="/topics/?order_by=-indexname">Topic Name</a>
 				</th>
 			{% endifnotequal %}
 			{% ifnotequal ordering "-scriptures" %}
-				<th scope="col">
+				<th>
 					<a href="/topics/?order_by=-scriptures">Scriptures</a>
 				</th>
 			{% else %}
-				<th scope="col">
+				<th>
 					<a href="/topics/?order_by=scriptures">Scriptures</a>
 				</th>
 			{% endifnotequal %}
 			{% ifnotequal ordering "-talks" %}
-				<th scope="col">
+				<th>
 					<a href="/topics/?order_by=-talks">Talks</a>
 				</th>
 			{% else %}
-				<th scope="col">
+				<th>
 					<a href="/topics/?order_by=talks">Talks</a>
 				</th>
 			{% endifnotequal %}
 			{% ifnotequal ordering "-quotes" %}
-				<th scope="col">
+				<th>
 					<a href="/topics/?order_by=-quotes">Quotes</a>
 				</th>
 			{% else %}
-				<th scope="col">
+				<th>
 					<a href="/topics/?order_by=quotes">Quotes</a>
 				</th>
 			{% endifnotequal %}
 			{% ifnotequal ordering "-last_modified" %}
-				<th scope="col">
+				<th colspan=2>
 					<a href="/topics/?order_by=-last_modified">Last Modified</a>
 				</th>
 			{% else %}
-				<th scope="col">
+				<th colspan=2>
 					<a href="/topics/?order_by=last_modified">Last Modified</a>
 				</th>
 			{% endifnotequal %}
@@ -61,11 +61,19 @@
 				<td>{{ topic.talkentry_set.all|length }}</td>
 				<td>{{ topic.quoteentry_set.all|length }}</td>
 				<td>{{ topic.last_modified|timesince }} ago</td>
+				<td>
+					<form>
+						<input type="button"
+						onclick="confirm_delete('/topics', '{{ topic.name }}', '{{ topic.name }}')"
+						class="table_button"
+					   	value="Delete" />
+					</form>
+				</td>
 			</tr>
 		{% endfor %}
 		<tr>
 			<td><a href="add">Add a new topic</a></td>
-			<td></td><td></td><td></td><td></td>
+			<td></td><td></td><td></td><td></td><td></td>
 		</tr>
 	</tbody>
 </table>

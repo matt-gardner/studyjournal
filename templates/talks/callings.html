@@ -5,7 +5,7 @@
 {% block content %}
 
 <form action="" method="get">
-	<table>
+	<table class=dateform>
 		<col width=5%>
 		<col width=5%>
 		<tr>
@@ -26,7 +26,7 @@
 	</table>
 </form>
 
-<table>
+<table class=first_presidency>
 	<thead>
 		<th>
 			First Presidency
@@ -48,10 +48,17 @@
 			<td><a href="/person/{{callings.second_counselor.id}}">{{ callings.second_counselor }}</a></td>
 		</tr>
 		{% endif %}
+		{% if callings.extra_counselors %}
+			{% for counselor in callings.extra_counselors %}
+			<tr>
+				<td><a href="/person/{{counselor.id}}">{{ counselor }}</a></td>
+			</tr>
+			{% endfor %}
+		{% endif %}
 	</tbody>
 </table>
 
-<table>
+<table class=apostles>
 	<thead>
 		<th>
 			Apostles
@@ -61,6 +68,43 @@
 		{% for apostle in callings.apostles %}
 		<tr>
 			<td><a href="/person/{{apostle.id}}">{{ apostle }}</a></td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+<table class=presiding_bishopric>
+	<thead>
+		<th>
+			Presiding Bishopric
+		</th>
+	</thead>
+	<tbody>
+		{% if callings.presiding_bishop %}
+		<tr>
+			<td><a href="/person/{{callings.presiding_bishop.id}}">{{ callings.presiding_bishop }}</a></td>
+		</tr>
+		{% endif %}
+		{% if callings.presiding_bishopric %}
+			{% for bishop in callings.presiding_bishopric %}
+			<tr>
+				<td><a href="/person/{{bishop.id}}">{{ bishop }}</a></td>
+			</tr>
+			{% endfor %}
+		{% endif %}
+	</tbody>
+</table>
+
+<table class=seventy>
+	<thead>
+		<th>
+			Seventy
+		</th>
+	</thead>
+	<tbody>
+		{% for seventy in callings.seventy %}
+		<tr>
+			<td><a href="/person/{{seventy.id}}">{{ seventy }}</a></td>
 		</tr>
 		{% endfor %}
 	</tbody>

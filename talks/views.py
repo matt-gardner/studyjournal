@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
-from studyjournal.talks.models import Talk, Person
+from studyjournal.talks.models import Talk, Person, Calling
 from studyjournal.topicalguide.models import Topic, TalkEntry
 from datetime import date, datetime
 from django import forms
@@ -15,6 +15,25 @@ def person(request, person_id):
     callings = person.calling_set.all()
     return render_to_response('talks/person.html', 
             {'person': person, 'talks': talks, 'callings': callings})
+
+def edit_person(request, person_id):
+    CallingFormSet = forms.models.inlineformset_factory(Person, Calling, extra=1)
+    if request.POST:
+        person = get_object_or_404(Person, pk=person_id)
+        form = EditPersonForm(request.POST, instance=person)
+        callingformset = CallingFormSet(request.POST, instance=person)
+        if callingformset.is_valid():
+            callingformset.save()
+        form.save()
+        return HttpResponseRedirect('/person/'+person_id)
+    page_vars = dict()
+    person = get_object_or_404(Person, pk=person_id)
+    form = EditPersonForm(instance=person)
+    callingformset = CallingFormSet(instance=person)
+    page_vars['form'] = form.as_table() + callingformset.as_table()
+    page_vars['submit_label'] = 'Edit person'
+    page_vars['header'] = 'Edit '+person.name()
+    return render_to_response('add_form.html', page_vars)
 
 def talk(request, talk_id):
     talk = get_object_or_404(Talk, pk=talk_id)
@@ -48,9 +67,10 @@ def callings(request):
         day = int(request.GET['day'])
     else:
         day = date.today().day
+    d = date(year, month, day)
     for person in Person.objects.all():
         try:
-            calling = person.get_calling(date(year, month, day))
+            calling = person.get_calling(d)
         except ValueError:
             continue
         if calling == 'P':
@@ -59,10 +79,17 @@ def callings(request):
             callings.first_counselor = person
         if calling == 'SC':
             callings.second_counselor = person
+        if calling == 'C':
+            callings.extra_counselors.append(person)
         if calling == 'A':
             callings.apostles.append(person)
         if calling == 'S':
             callings.seventy.append(person)
+        if calling == 'B':
+            callings.presiding_bishop = person
+        if calling == 'PB':
+            callings.presiding_bishopric.append(person)
+    callings.sort_by_date()
     return render_to_response('talks/callings.html',
             {'callings': callings, 'year': year, 'month': month, 'day': day})
 
@@ -72,11 +99,22 @@ class Callings(object):
         self.president = None
         self.first_counselor = None
         self.second_counselor = None
+        self.extra_counselors = []
         self.apostles = []
         self.seventy = []
+        self.presiding_bishop = None
+        self.presiding_bishopric = []
+
+    def sort_by_date(self):
+        self.apostles.sort(key=lambda x:
+                x.calling_set.get(calling='A').startdate)
 
 
 class AddTalkToTopicForm(forms.Form):
     topic = forms.ModelChoiceField(Topic.objects.all(), label="",
             empty_label=None)
+
+class EditPersonForm(forms.ModelForm):
+    class Meta:
+        model = Person
 

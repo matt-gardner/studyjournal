@@ -37,3 +37,14 @@ function toggle_scriptures(book)
 		table.className = 'scriptures_hide';
 	}
 }
+function confirm_delete(baseurl, name, deleteurl)
+{
+	var result = confirm("Are you sure you want to delete "+name+"?");
+	if (result == true)
+	{
+		window.location=baseurl+"?delete="+deleteurl;
+	}
+	else
+	{
+	}
+}

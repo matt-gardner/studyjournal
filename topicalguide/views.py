@@ -8,6 +8,10 @@ from datetime import datetime
 from scriptures import get_book, split_for_sorting, books
 
 def index(request):
+    if 'delete' in request.GET:
+        topic = Topic.objects.get(name=request.GET['delete'])
+        topic.delete()
+        return HttpResponseRedirect('/topics')
     allowed_orderings = ['indexname', '-indexname', 'last_modified', '-last_modified']
     ordering = 'indexname'
     if 'order_by' in request.GET:
@@ -38,6 +42,23 @@ def index(request):
             {'topics' : topics, 'ordering': ordering})
 
 def topic(request, topic_name):
+    if 'delete' in request.GET:
+        delete = request.GET['delete']
+        if 'talk' in delete:
+            talkentry = TalkEntry.objects.get(pk=delete[4:])
+            talkentry.delete()
+        elif 'sr' in delete:
+            srentry = ScriptureReferenceEntry.objects.get(pk=delete[2:])
+            srentry.delete()
+        elif 'q' in delete:
+            qentry = QuoteEntry.objects.get(pk=delete[1:])
+            qentry.delete()
+        elif 'related' in delete:
+            rt = Topic.objects.get(pk=delete[7:])
+            topic = get_object_or_404(Topic, name=topic_name)
+            topic.related_topics.remove(rt)
+            topic.save()
+        return HttpResponseRedirect('/topic/'+topic_name)
     topic = get_object_or_404(Topic, name=topic_name)
     return render_to_response('topicalguide/topic.html', {'topic' : topic})
 
@@ -72,7 +93,7 @@ def add_topic(request):
     page_vars['form'] = form
     page_vars['submit_label'] = "Add topic"
     page_vars['header'] = "Add a new topic"
-    return render_to_response('topicalguide/add_form.html', page_vars)
+    return render_to_response('add_form.html', page_vars)
 
 def edit_topic(request, topic_id):
     topic = get_object_or_404(Topic, pk=topic_id)
@@ -89,7 +110,7 @@ def edit_topic(request, topic_id):
     page_vars['form'] = form
     page_vars['submit_label'] = "Edit topic"
     page_vars['header'] = "Edit topic " + topic.name
-    return render_to_response('topicalguide/add_form.html', page_vars)
+    return render_to_response('add_form.html', page_vars)
 
 
 def add_related_topic(request, topic_name, **kwds):
@@ -107,7 +128,7 @@ def add_related_topic(request, topic_name, **kwds):
     page_vars['submit_label'] = "Add related topic"
     page_vars['header'] = "Add a related topic to " + topic_name
     page_vars['form'] = form
-    return render_to_response('topicalguide/add_form.html', page_vars)
+    return render_to_response('add_form.html', page_vars)
 
 
 def add_scripture_entry(request, topic_name, **kwds):
@@ -143,7 +164,7 @@ def add_scripture_entry(request, topic_name, **kwds):
         page_vars['submit_label'] = "Add reference"
         page_vars['header'] = "Add a scripture reference to " + topic_name
     page_vars['form'] = form
-    return render_to_response('topicalguide/add_form.html', page_vars)
+    return render_to_response('add_form.html', page_vars)
 
 def add_talk_entry(request, topic_name, **kwds):
     if request.POST and request.POST['edit'] != 'Person':
@@ -186,7 +207,7 @@ def add_talk_entry(request, topic_name, **kwds):
         page_vars['header'] = "Add a talk to " + topic_name
         page_vars['subheader'] = "Pick a person first"
     page_vars['form'] = form
-    return render_to_response('topicalguide/add_form.html', page_vars)
+    return render_to_response('add_form.html', page_vars)
 
 def add_quote(request, topic_name, **kwds):
     if request.POST:
@@ -225,7 +246,7 @@ def add_quote(request, topic_name, **kwds):
         page_vars['submit_label'] = "Add quote"
         page_vars['header'] = "Add a quote to " + topic_name
     page_vars['form'] = form
-    return render_to_response('topicalguide/add_form.html', page_vars)
+    return render_to_response('add_form.html', page_vars)
 
 class AddTopicForm(forms.ModelForm):
     class Meta:

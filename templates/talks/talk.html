@@ -3,10 +3,15 @@
 {% block title %}{{ talk }}{% endblock %}
 
 {% block content %}
-{% if talk.speakername %}
-<h1>{{ talk.speakername }} </h1>
+{% if talk.title %}
+<h1>{{ talk.title }}</h1>
 {% else %}
-<h1>{{ talk.speaker.name }}</h1>
+<h1>No Title</h1>
+{% endif %}
+{% if talk.speakername %}
+<h3>{{ talk.speakername }} </h3>
+{% else %}
+<h3>{{ talk.speaker.name }}</h3>
 {% endif %}
 <h3>{{ talk.date }}</h3>
 <h3>{{ talk.get_type_display }}</h3>
@@ -33,6 +38,6 @@
 		</tr>
 	</tbody>
 </table>
-<h3>Title: {{ talk.title }}</h3>
+<h3>Text:</h3>
 {{ talk.text|linebreaks }} 
 {% endblock %}
