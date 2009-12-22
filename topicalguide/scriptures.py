@@ -64,26 +64,21 @@ def get_link(reference):
 def get_link_part(reference, book, chapter):
     link = ''
     after_link = ''
-    if '(' in reference:
-        substring = reference[reference.find('(')-1:reference.find(')')+1]
-        ref = reference.replace(substring,'')
-    else:
-        ref = reference
-    items = ref.split()
+    items = reference.split()
     i = 0
     if book and chapter:
-        if ',' in ref:
-            verse = ref[:ref.find(',')+1]
+        if ',' in reference:
+            verse = reference[:reference.find(',')+1]
         else:
-            verse = ref
+            verse = reference
     if not book:
         book = items[i]
-        i += 1
+        i, comma = advance_i(i, items)
         while book not in books:
             if i >= len(items):
-                return ref
+                return reference
             book += ' ' + items[i]
-            i += 1
+            i, comma = advance_i(i, items)
     if not chapter:
         if ':' in items[i]:
             try:
@@ -97,42 +92,48 @@ def get_link_part(reference, book, chapter):
         else:
             chapter = items[i]
             verse = ''
-    i += 1
-    if ',' in chapter:
+    i, comma = advance_i(i, items)
+    if comma or ',' in chapter:
         chapter = chapter.replace(',','')
-        reference = reference[:reference.find(',')+1]
-        reference = reference.replace(',',', ')
+        reference = ' '.join(items[:i])+' '
         ref = ' '.join(items[i:])
         if items[i][0].isdigit():
             after_link = get_link_part(ref, book, '')
         else:
             after_link = get_link_part(ref, '', '')
+    verserange = verse
     if '-' in verse:
-        verserange = verse
         verse = verse.split('-')[0]
-    else:
-        verserange = verse
     if ',' in verserange:
         verserange = verserange.replace(',','')
-        reference = ' '.join(items[:i])
-        reference = reference.replace(',',', ')
+        reference = ' '.join(items[:i])+' '
         verse = verse.replace(',','')
         ref = ' '.join(items[i:])
         if items[i][0].isdigit():
             if ':' in items[i]:
                 after_link += get_link_part(ref, book, '')
             else:
-                verserange += ','+items[i]
-                if len(items) > i+1 and items[i+1][0].isdigit():
-                    verserange += items[i+1]
+                n = 0
+                while i+n < len(items) and items[i+n][0].isdigit():
+                    verserange += ','+items[i+n].replace(',','')
+                    n += 1
                 reference = reference + ref
-                #after_link += get_link_part(ref, book, chapter)
         else:
             after_link += get_link_part(ref, '', '')
     link += make_link(reference, book, chapter, verserange, verse)
     link += after_link
     return link
 
+def advance_i(i, items):
+    i += 1
+    comma = False
+    if i < len(items) and '(' in items[i]:
+        while ')' not in items[i]:
+            i += 1
+        if ',' in items[i]:
+            comma = True
+        i += 1
+    return i, comma
 
 def make_link(ref, book, chapter, verserange, verse):
     for i, b in enumerate(books):
