@@ -115,9 +115,14 @@ def get_link_part(reference, book, chapter):
             else:
                 n = 0
                 while i+n < len(items) and items[i+n][0].isdigit():
+                    if ':' in items[i+n]:
+                        reference = ' '.join(items[:i+n])+' '
+                        after_link += get_link_part(' '.join(items[i+n:]), book, '')
+                        break
                     verserange += ','+items[i+n].replace(',','')
                     n += 1
-                reference = reference + ref
+                else:
+                    reference = reference + ref
         else:
             after_link += get_link_part(ref, '', '')
     link += make_link(reference, book, chapter, verserange, verse)
