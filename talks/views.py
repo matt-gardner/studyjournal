@@ -18,8 +18,8 @@ def person(request, person_id):
 
 def edit_person(request, person_id):
     CallingFormSet = forms.models.inlineformset_factory(Person, Calling, extra=1)
+    person = get_object_or_404(Person, pk=person_id)
     if request.POST:
-        person = get_object_or_404(Person, pk=person_id)
         form = EditPersonForm(request.POST, instance=person)
         callingformset = CallingFormSet(request.POST, instance=person)
         if callingformset.is_valid():
@@ -27,12 +27,39 @@ def edit_person(request, person_id):
         form.save()
         return HttpResponseRedirect('/person/'+person_id)
     page_vars = dict()
-    person = get_object_or_404(Person, pk=person_id)
     form = EditPersonForm(instance=person)
     callingformset = CallingFormSet(instance=person)
     page_vars['form'] = form.as_table() + callingformset.as_table()
     page_vars['submit_label'] = 'Edit person'
     page_vars['header'] = 'Edit '+person.name()
+    return render_to_response('add_form.html', page_vars)
+
+def edit_talk(request, talk_id):
+    talk = get_object_or_404(Talk, pk=talk_id)
+    if request.POST:
+        form = EditTalkForm(request.POST, instance=talk)
+        if form.is_valid():
+            form.save()
+        return HttpResponseRedirect('/talk/'+talk_id)
+    page_vars = dict()
+    form = EditTalkForm(instance=talk)
+    page_vars['form'] = form
+    page_vars['submit_label'] = 'Edit Talk'
+    page_vars['header'] = 'Edit '+talk.__unicode__()
+    return render_to_response('add_form.html', page_vars)
+
+def add_talk(request, person_id):
+    person = get_object_or_404(Person, pk=person_id)
+    if request.POST:
+        form = EditTalkForm(request.POST)
+        if form.is_valid():
+            form.save()
+        return HttpResponseRedirect('/person/'+person_id)
+    form = EditTalkForm(person=person, initial={'speaker':person.name()})
+    page_vars = dict()
+    page_vars['form'] = form
+    page_vars['submit_label'] = 'Add Talk'
+    page_vars['header'] = 'Add talk to '+person.name()
     return render_to_response('add_form.html', page_vars)
 
 def talk(request, talk_id):
@@ -118,3 +145,18 @@ class EditPersonForm(forms.ModelForm):
     class Meta:
         model = Person
 
+class EditTalkForm(forms.ModelForm):
+    def __init__(self, person=None, *args, **kwds):
+        super(EditTalkForm, self).__init__(*args, **kwds)
+        if person:
+            self.fields['speaker'] = forms.CharField(label='Speaker',
+                    widget=forms.TextInput({'readonly':True}))
+            if person.firstname == 'Other' and person.lastname == 'Other':
+                self.fields['speaker'].widget=forms.HiddenInput()
+            else:
+                self.fields.__delitem__('speakername')
+        else:
+            self.fields['speakername'].label = 'Speakername (only for Other)'
+
+    class Meta:
+        model = Talk

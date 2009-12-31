@@ -32,10 +32,11 @@
 		{% endif %}
 			<td>
 			{% if talk.quote %}
-			{{ talk.quote }}
-			<br> --
+			{{ talk.quote|linebreaks }}
+			--
 			{% endif %}
-			<a href='/talk/{{ talk.talk.id }}'>{{ talk }}</a>
+			<a href='/talk/{{ talk.talk.id }}'>{{ talk.talk.title }}</a>,
+			<a href='/person/{{talk.talk.speaker.id}}'>{{ talk.talk.speaker.name }}</a>
 			{% if talk.notes %}
 			<ul><li>{{ talk.notes }}</li></ul></td>
 			<td class=notes>Notes</td>
@@ -120,8 +121,8 @@
 	<tr class=no_notes>
 	{% endif %}
 	<td>
-	{{ quote.quote }} 
-	<br> -- <a href='/person/{{ quote.person.id }}'>{{ quote.person.name }},</a>
+	{{ quote.quote|linebreaks }} 
+	-- <a href='/person/{{ quote.person.id }}'>{{ quote.person.name }},</a>
 	{{ quote.source }}
 	{% if quote.notes %}
 	<ul><li>{{ quote.notes }}</li></ul></td>

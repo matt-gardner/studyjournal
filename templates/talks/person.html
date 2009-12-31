@@ -35,12 +35,12 @@
 	</thead>
 	{% for talk in talks %}
 		<tr>
-			<td>{{ talk.title }}</td>
+			<td><a href="/talk/{{ talk.id }}">{{ talk.title }}</a></td>
 			<td>{{ talk.get_type_display }}</td>
 			<td>{{ talk.date_string }}</td>
 			<td>{{ talk.talkentry_set.all|length }}</td>
 			{% if talk.text %}
-				<td><a href="../../talk/{{ talk.id }}">Text</a></td>
+				<td><a href="/talk/{{ talk.id }}">Text</a></td>
 			{% else %}
 				<td>No text</td>
 			{% endif %}
@@ -51,6 +51,10 @@
 			{% endif %}
 		</tr>
 	{% endfor %}
+	<tr>
+		<td><a href="addtalk">Add a talk</a></td>
+		<td></td><td></td><td></td><td></td><td></td>
+	</tr>
 </table>
 {% endif %}
 {% endblock %}

@@ -92,6 +92,11 @@ table td
 	padding:6px 8px;
 	vertical-align:top;
 }
+table td p
+{
+	margin-top:0px;
+	margin-bottom:4px;
+}
 table tbody tr:hover td
 {
 	color:#009;
