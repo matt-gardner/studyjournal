@@ -146,11 +146,12 @@ class EditPersonForm(forms.ModelForm):
         model = Person
 
 class EditTalkForm(forms.ModelForm):
-    def __init__(self, person=None, *args, **kwds):
+    def __init__(self, *args, **kwds):
         super(EditTalkForm, self).__init__(*args, **kwds)
-        if person:
+        if 'person' in kwds:
             self.fields['speaker'] = forms.CharField(label='Speaker',
                     widget=forms.TextInput({'readonly':True}))
+            person = kwds['person']
             if person.firstname == 'Other' and person.lastname == 'Other':
                 self.fields['speaker'].widget=forms.HiddenInput()
             else:
