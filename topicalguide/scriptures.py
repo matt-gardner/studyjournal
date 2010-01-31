@@ -93,23 +93,24 @@ def get_link_part(reference, book, chapter):
             chapter = items[i]
             verse = ''
     i, comma = advance_i(i, items)
-    if comma or ',' in chapter:
+    if (comma or ',' in chapter) and str(verse) == '':
+        comma = False
         chapter = chapter.replace(',','')
         reference = ' '.join(items[:i])+' '
         ref = ' '.join(items[i:])
-        if items[i][0].isdigit():
+        if items[i][0].isdigit() and not is_book(ref):
             after_link = get_link_part(ref, book, '')
         else:
             after_link = get_link_part(ref, '', '')
     verserange = verse
     if '-' in verse:
         verse = verse.split('-')[0]
-    if ',' in verserange:
+    if ',' in verserange or comma:
         verserange = verserange.replace(',','')
         reference = ' '.join(items[:i])+' '
         verse = verse.replace(',','')
         ref = ' '.join(items[i:])
-        if items[i][0].isdigit():
+        if items[i][0].isdigit() and not is_book(ref):
             if ':' in items[i]:
                 after_link += get_link_part(ref, book, '')
             else:
@@ -117,7 +118,8 @@ def get_link_part(reference, book, chapter):
                 while i+n < len(items) and items[i+n][0].isdigit():
                     if ':' in items[i+n]:
                         reference = ' '.join(items[:i+n])+' '
-                        after_link += get_link_part(' '.join(items[i+n:]), book, '')
+                        after_link += \
+                                get_link_part(' '.join(items[i+n:]), book, '')
                         break
                     verserange += ','+items[i+n].replace(',','')
                     n += 1
@@ -140,10 +142,19 @@ def advance_i(i, items):
         i += 1
     return i, comma
 
+def is_book(ref):
+    if not ref[0].isdigit():
+        return True
+    book = ' '.join(ref.split(' ')[:2])
+    if book in books:
+        return True
+    return False
+
 def make_link(ref, book, chapter, verserange, verse):
     for i, b in enumerate(books):
         if book == b:
-            link = '<a href="http://scriptures.lds.org/en/'+links[i]+'/'+str(chapter)
+            link = '<a href="http://scriptures.lds.org/en/'+links[i]+'/'+\
+                    str(chapter)
             if verserange:
                 link += '/'+verserange+'#'+verse
             link += '">'+ref+'</a>'
