@@ -56,7 +56,7 @@
 	<tbody>
 		{% for topic in topics %}
 			<tr>
-				<td><a href="../topic/{{ topic.name }}">{{ topic.indexname }}</a></td>
+				<td><a href="/topic/{{ topic.id }}">{{ topic.indexname }}</a></td>
 				<td>{{ topic.scripturereferenceentry_set.all|length }}</td>
 				<td>{{ topic.talkentry_set.all|length }}</td>
 				<td>{{ topic.quoteentry_set.all|length }}</td>
@@ -64,7 +64,7 @@
 				<td>
 					<form>
 						<input type="button"
-						onclick="confirm_delete('/topics', '{{ topic.name }}', '{{ topic.name }}')"
+						onclick="confirm_delete('/topics', '{{ topic.name }}', '{{ topic.id }}')"
 						class="table_button"
 					   	value="Delete" />
 					</form>

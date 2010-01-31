@@ -47,7 +47,7 @@
 			<td>
 				<form>
 						<input type="button"
-						onclick="confirm_delete('/topic/{{ topic.name }}',
+						onclick="confirm_delete('/topic/{{ topic.id }}',
 						'this talk from {{ topic.name }}', 'talk{{ talk.id }}')"
 						class="table_button"
 					   	value="Delete" />
@@ -88,7 +88,7 @@
 			<td>
 				<form>
 						<input type="button"
-						onclick="confirm_delete('/topic/{{ topic.name }}',
+						onclick="confirm_delete('/topic/{{ topic.id }}',
 						'this reference from {{ topic.name }}', 'sr{{ ref.id }}')"
 						class="table_button"
 					   	value="Delete" />
@@ -134,7 +134,7 @@
 	<td>
 	<form>
 	<input type="button"
-	onclick="confirm_delete('/topic/{{ topic.name }}',
+	onclick="confirm_delete('/topic/{{ topic.id }}',
 	'this quote from {{ topic.name }}', 'q{{ quote.id }}')"
 	class="table_button"
 	value="Delete" />
@@ -158,11 +158,11 @@
 	<tbody>
 		{% for r_topic in topic.related_topics.all %}
 			<tr>
-				<td><a href="/topic/{{ r_topic }}">{{ r_topic.name }}</a></td>
+				<td><a href="/topic/{{ r_topic.id }}">{{ r_topic.name }}</a></td>
 				<td>
 					<form>
 							<input type="button"
-							onclick="confirm_delete('/topic/{{ topic.name }}',
+							onclick="confirm_delete('/topic/{{ topic.id }}',
 							'this related topic from {{ topic.name }}', 'related{{ r_topic.id }}')"
 							class="table_button"
 							value="Remove" />

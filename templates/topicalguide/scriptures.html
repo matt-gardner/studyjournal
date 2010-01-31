@@ -17,7 +17,7 @@
 		{% for ref in book.refs %}
 		<tr>
 			<td>{{ref.get_link}}</td>
-			<td><a href="/topic/{{ref.topic.name}}">{{ref.topic.name}}</a></td>
+			<td><a href="/topic/{{ref.topic.id}}">{{ref.topic.name}}</a></td>
 		</tr>
 		{% endfor %}
 	</tbody>

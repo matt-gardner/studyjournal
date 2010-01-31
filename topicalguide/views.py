@@ -9,7 +9,7 @@ from scriptures import get_book, split_for_sorting, books
 
 def index(request):
     if 'delete' in request.GET:
-        topic = Topic.objects.get(name=request.GET['delete'])
+        topic = Topic.objects.get(pk=request.GET['delete'])
         topic.delete()
         return HttpResponseRedirect('/topics')
     allowed_orderings = ['indexname', '-indexname', 'last_modified', '-last_modified']
@@ -41,7 +41,7 @@ def index(request):
     return render_to_response('topicalguide/index.html',
             {'topics' : topics, 'ordering': ordering})
 
-def topic(request, topic_name):
+def topic(request, topic_id):
     if 'delete' in request.GET:
         delete = request.GET['delete']
         if 'talk' in delete:
@@ -55,11 +55,11 @@ def topic(request, topic_name):
             qentry.delete()
         elif 'related' in delete:
             rt = Topic.objects.get(pk=delete[7:])
-            topic = get_object_or_404(Topic, name=topic_name)
+            topic = get_object_or_404(Topic, pk=topic_id)
             topic.related_topics.remove(rt)
             topic.save()
-        return HttpResponseRedirect('/topic/'+topic_name)
-    topic = get_object_or_404(Topic, name=topic_name)
+        return HttpResponseRedirect('/topic/'+topic_id)
+    topic = get_object_or_404(Topic, pk=topic_id)
     return render_to_response('topicalguide/topic.html', {'topic' : topic})
 
 def scriptures(request):
@@ -87,7 +87,7 @@ def add_topic(request):
                 last_modified=datetime.now(),
                 notes=request.POST['notes'].strip())
         new_topic.save()
-        return HttpResponseRedirect('/topics/')
+        return HttpResponseRedirect('/topic/'+str(new_topic.id))
     form = AddTopicForm()
     page_vars = dict()
     page_vars['form'] = form
@@ -113,28 +113,27 @@ def edit_topic(request, topic_id):
     return render_to_response('add_form.html', page_vars)
 
 
-def add_related_topic(request, topic_name, **kwds):
+def add_related_topic(request, topic_id, **kwds):
+    topic = get_object_or_404(Topic, pk=topic_id)
     if request.POST:
-        topic = Topic.objects.get(name=topic_name)
         related_topic = Topic.objects.get(pk=request.POST['related_topic'])
         if (related_topic not in topic.related_topics.all() and
                 related_topic != topic):
             topic.related_topics.add(related_topic)
             topic.last_modified = datetime.now()
             topic.save()
-        return HttpResponseRedirect('/topic/'+topic_name)
+        return HttpResponseRedirect('/topic/'+topic_id)
     page_vars = dict()
     form = RelatedTopicForm()
     page_vars['submit_label'] = "Add related topic"
-    page_vars['header'] = "Add a related topic to " + topic_name
+    page_vars['header'] = "Add a related topic to " + topic.name
     page_vars['form'] = form
     return render_to_response('add_form.html', page_vars)
 
 
-def add_scripture_entry(request, topic_name, **kwds):
+def add_scripture_entry(request, topic_id, **kwds):
+    topic = get_object_or_404(Topic, pk=topic_id)
     if request.POST:
-        topic = Topic.objects.get(name=topic_name)
-        topic = Topic.objects.get(name=topic_name)
         if request.POST['edit'] != 'False':
             entry = ScriptureReferenceEntry.objects.get(pk=request.POST['edit'])
             entry.notes = request.POST['notes'].strip()
@@ -148,27 +147,27 @@ def add_scripture_entry(request, topic_name, **kwds):
         entry.save()
         topic.last_modified = datetime.now()
         topic.save()
-        return HttpResponseRedirect('/topic/'+topic_name)
+        return HttpResponseRedirect('/topic/'+topic_id)
     page_vars = dict()
     if kwds.has_key('entry_id'):
         entry = ScriptureReferenceEntry.objects.get(pk=kwds['entry_id'])
-        form = AddScriptureForm(initial={'topic': topic_name,
+        form = AddScriptureForm(initial={'topic': topic.name,
                 'notes': entry.notes,
                 'reference': entry.reference,
                 'edit': entry.id})
         page_vars['submit_label'] = "Edit reference"
-        page_vars['header'] = "Edit a scripture reference in " + topic_name
+        page_vars['header'] = "Edit a scripture reference in " + topic.name
     else:
-        form = AddScriptureForm(initial={'topic': topic_name,
+        form = AddScriptureForm(initial={'topic': topic.name,
                 'edit': 'False'})
         page_vars['submit_label'] = "Add reference"
-        page_vars['header'] = "Add a scripture reference to " + topic_name
+        page_vars['header'] = "Add a scripture reference to " + topic.name
     page_vars['form'] = form
     return render_to_response('add_form.html', page_vars)
 
-def add_talk_entry(request, topic_name, **kwds):
+def add_talk_entry(request, topic_id, **kwds):
+    topic = get_object_or_404(Topic, pk=topic_id)
     if request.POST and request.POST['edit'] != 'Person':
-        topic = Topic.objects.get(name=topic_name)
         if request.POST['edit'] != 'False':
             entry = TalkEntry.objects.get(pk=request.POST['edit'])
             entry.notes = request.POST['notes'].strip()
@@ -183,35 +182,36 @@ def add_talk_entry(request, topic_name, **kwds):
         entry.save()
         topic.last_modified = datetime.now()
         topic.save()
-        return HttpResponseRedirect('/topic/'+topic_name)
+        return HttpResponseRedirect('/topic/'+topic_id)
     page_vars = dict()
     if request.POST:
         form = AddTalkForm(person=request.POST['talk'],
-                initial={'topic': topic_name,
+                initial={'topic': topic.name,
                 'edit': 'False'})
         page_vars['submit_label'] = "Add Talk"
-        page_vars['header'] = "Add a talk to " + topic_name
+        page_vars['header'] = "Add a talk to " + topic.name
     elif kwds.has_key('entry_id'):
         entry = TalkEntry.objects.get(pk=kwds['entry_id'])
-        form = AddTalkForm(edit=True, initial={'topic': topic_name,
-                'talk': entry.talk.__unicode__(),
+        form = AddTalkForm(edit=True, person=entry.talk.speaker.id,
+                initial={'topic': topic.name,
+                'talk': entry.talk.id,
                 'quote': entry.quote,
                 'notes': entry.notes,
                 'edit': entry.id})
         page_vars['submit_label'] = "Edit talk"
-        page_vars['header'] = "Edit a quote for a talk in " + topic_name
+        page_vars['header'] = "Edit a quote for a talk in " + topic.name
     else:
-        form = AddTalkForm(initial={'topic': topic_name,
+        form = AddTalkForm(initial={'topic': topic.name,
                 'edit': 'Person'})
         page_vars['submit_label'] = "Select Talk"
-        page_vars['header'] = "Add a talk to " + topic_name
+        page_vars['header'] = "Add a talk to " + topic.name
         page_vars['subheader'] = "Pick a person first"
     page_vars['form'] = form
     return render_to_response('add_form.html', page_vars)
 
-def add_quote(request, topic_name, **kwds):
+def add_quote(request, topic_id, **kwds):
+    topic = get_object_or_404(Topic, pk=topic_id)
     if request.POST:
-        topic = Topic.objects.get(name=topic_name)
         if request.POST['edit'] != 'False':
             entry = QuoteEntry.objects.get(pk=request.POST['edit'])
             entry.person = Person.objects.get(pk=request.POST['person'])
@@ -228,23 +228,23 @@ def add_quote(request, topic_name, **kwds):
         entry.save()
         topic.last_modified = datetime.now()
         topic.save()
-        return HttpResponseRedirect('/topic/'+topic_name)
+        return HttpResponseRedirect('/topic/'+topic_id)
     page_vars = dict()
     if kwds.has_key('entry_id'):
         entry = QuoteEntry.objects.get(pk=kwds['entry_id'])
-        form = AddQuoteForm(initial={'topic': topic_name,
+        form = AddQuoteForm(initial={'topic': topic.name,
                 'notes': entry.notes,
                 'person': entry.person.id, # this doesn't work -- why not?
                 'quote': entry.quote,
                 'source': entry.source,
                 'edit': entry.id})
         page_vars['submit_label'] = "Edit quote"
-        page_vars['header'] = "Edit a quote in " + topic_name
+        page_vars['header'] = "Edit a quote in " + topic.name
     else:
-        form = AddQuoteForm(initial={'topic': topic_name,
+        form = AddQuoteForm(initial={'topic': topic.name,
                 'edit': 'False'})
         page_vars['submit_label'] = "Add quote"
-        page_vars['header'] = "Add a quote to " + topic_name
+        page_vars['header'] = "Add a quote to " + topic.name
     page_vars['form'] = form
     return render_to_response('add_form.html', page_vars)
 
@@ -274,7 +274,12 @@ class AddQuoteForm(forms.ModelForm):
 class AddTalkForm(forms.ModelForm):
     def __init__(self, edit=False, person=None, talk=None, *args, **kwds):
         super(AddTalkForm, self).__init__(*args, **kwds)
-        if edit or talk:
+        if talk:
+            return
+        if edit:
+            self.fields['talk'] = forms.ModelChoiceField(
+                    Person.objects.get(pk=person).talk_set.all(),
+                    label='Talk', empty_label=None)
             return
         if not person:
             self.fields['talk'] = forms.ModelChoiceField(Person.objects.all(),

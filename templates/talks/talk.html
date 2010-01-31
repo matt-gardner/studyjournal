@@ -27,7 +27,7 @@
 		{% for entry in talk.talkentry_set.all %}
 		<tr>
 			<td>
-				<a href="/topic/{{ entry.topic.name }}">{{ entry.topic.name }}</a>
+				<a href="/topic/{{ entry.topic.id }}">{{ entry.topic.name }}</a>
 			</td>
 		</tr>
 		{% endfor %}

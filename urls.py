@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib import admin
 admin.autodiscover()
 
-topicname = '(?P<topic_name>[\'\w,\:\s]+)'
+topicname = '(?P<topic_id>\d+)'
 
 urlpatterns = patterns('',
     (r'^$', 'studyjournal.talks.views.index'),
@@ -20,21 +20,21 @@ urlpatterns = patterns('',
     (r'^topics/add/$', 'studyjournal.topicalguide.views.add_topic'),
     (r'^topics/edit(?P<topic_id>\d+)/$',
             'studyjournal.topicalguide.views.edit_topic'),
-    (r'^topic/'+topicname+'/$',
+    (r'^topic/(?P<topic_id>\d+)/$',
             'studyjournal.topicalguide.views.topic'),
-    (r'^topic/'+topicname+'/addrt$',
+    (r'^topic/(?P<topic_id>\d+)/addrt$',
             'studyjournal.topicalguide.views.add_related_topic'),
-    (r'^topic/'+topicname+'/addsr$',
+    (r'^topic/(?P<topic_id>\d+)/addsr$',
             'studyjournal.topicalguide.views.add_scripture_entry'),
-    (r'^topic/'+topicname+'/sr(?P<entry_id>\d+)/$',
+    (r'^topic/(?P<topic_id>\d+)/sr(?P<entry_id>\d+)/$',
             'studyjournal.topicalguide.views.add_scripture_entry'),
-    (r'^topic/'+topicname+'/addq$',
+    (r'^topic/(?P<topic_id>\d+)/addq$',
             'studyjournal.topicalguide.views.add_quote'),
-    (r'^topic/'+topicname+'/q(?P<entry_id>\d+)/$',
+    (r'^topic/(?P<topic_id>\d+)/q(?P<entry_id>\d+)/$',
             'studyjournal.topicalguide.views.add_quote'),
-    (r'^topic/'+topicname+'/addt$',
+    (r'^topic/(?P<topic_id>\d+)/addt$',
             'studyjournal.topicalguide.views.add_talk_entry'),
-    (r'^topic/'+topicname+'/t(?P<entry_id>\d+)/$',
+    (r'^topic/(?P<topic_id>\d+)/t(?P<entry_id>\d+)/$',
             'studyjournal.topicalguide.views.add_talk_entry'),
     (r'^scriptures/$', 'studyjournal.topicalguide.views.scriptures'),
     (r'^callings/$', 'studyjournal.talks.views.callings'),
