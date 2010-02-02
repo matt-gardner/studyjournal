@@ -12,7 +12,8 @@ def index(request):
         topic = Topic.objects.get(pk=request.GET['delete'])
         topic.delete()
         return HttpResponseRedirect('/topics')
-    allowed_orderings = ['indexname', '-indexname', 'last_modified', '-last_modified']
+    allowed_orderings = ['indexname', '-indexname', 'last_modified',
+            '-last_modified']
     ordering = 'indexname'
     if 'order_by' in request.GET:
         ordering = request.GET['order_by']
@@ -80,31 +81,40 @@ def scriptures(request):
             {'scriptures' : scripture_set})
 
 def add_topic(request):
+    error = False
     if request.POST:
-        new_topic = Topic(name=request.POST['name'],
-                subheading=request.POST['subheading'],
-                indexname=request.POST['indexname'],
-                last_modified=datetime.now(),
-                notes=request.POST['notes'].strip())
-        new_topic.save()
-        return HttpResponseRedirect('/topic/'+str(new_topic.id))
-    form = AddTopicForm()
+        new_topic_form = AddTopicForm(request.POST)
+        if new_topic_form.is_valid():
+            new_topic_form.save()
+            timestamp = request.POST['last_modified']
+            date, time = timestamp.split()
+            year, month, day = map(int, date.split('-'))
+            hour, minute, second = map(int, time.split(':'))
+            timestamp = datetime(year, month, day, hour, minute, second)
+            new_topic = Topic.objects.get(last_modified=timestamp)
+            return HttpResponseRedirect('/topic/'+str(new_topic.id))
+        else:
+            error = True
     page_vars = dict()
+    if error:
+        form = new_topic_form
+        page_vars['header'] = "Error in adding topic! Please try again"
+    else:
+        form = AddTopicForm()
+        page_vars['header'] = "Add a new topic"
     page_vars['form'] = form
     page_vars['submit_label'] = "Add topic"
-    page_vars['header'] = "Add a new topic"
     return render_to_response('add_form.html', page_vars)
 
 def edit_topic(request, topic_id):
     topic = get_object_or_404(Topic, pk=topic_id)
     if request.POST:
-        topic.name = request.POST['name']
-        topic.subheading = request.POST['subheading']
-        topic.indexname = request.POST['indexname']
-        topic.notes = request.POST['notes'].strip()
-        topic.last_modified = datetime.now()
-        topic.save()
-        return HttpResponseRedirect('/topic/'+topic.name)
+        form = AddTopicForm(request.POST, instance=topic)
+        if form.is_valid():
+            form.save()
+            topic.last_modified = datetime.now()
+            topic.save()
+        return HttpResponseRedirect('/topic/'+str(topic.id))
     form = AddTopicForm(instance=topic)
     page_vars = dict()
     page_vars['form'] = form
@@ -249,9 +259,14 @@ def add_quote(request, topic_id, **kwds):
     return render_to_response('add_form.html', page_vars)
 
 class AddTopicForm(forms.ModelForm):
+    def __init__(self, *args, **kwds):
+        super(AddTopicForm, self).__init__(*args, **kwds)
+        self.fields['last_modified'].widget = forms.HiddenInput()
+        self.fields['last_modified'].initial = str(datetime.now()).split('.')[0]
+
     class Meta:
         model = Topic
-        exclude = ['related_topics', 'last_modified']
+        exclude = ['related_topics']
 
 class AddScriptureForm(forms.ModelForm):
     topic = forms.CharField(label='Topic',
