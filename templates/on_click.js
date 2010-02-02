@@ -37,6 +37,21 @@ function toggle_scriptures(book)
 		table.className = 'scriptures_hide';
 	}
 }
+function toggle_people(letter)
+{
+	var str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	for(var i=0; i<str.length; i++)
+	{
+		var l = str.charAt(i);
+		var ul = document.getElementById(l);
+		if (ul)
+		{
+			ul.className = 'hide_people';
+		}
+	}
+	var ul = document.getElementById(letter);
+	ul.className = 'show_people';
+}
 function confirm_delete(baseurl, name, deleteurl)
 {
 	var result = confirm("Are you sure you want to delete "+name+"?");

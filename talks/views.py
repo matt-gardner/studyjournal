@@ -6,8 +6,17 @@ from datetime import date, datetime
 from django import forms
 
 def index(request):
-    people_list = Person.objects.all().order_by('lastname')
-    return render_to_response('talks/index.html', {'people_list': people_list})
+    return render_to_response('index.html')
+
+def people(request):
+    people = Person.objects.all().order_by('lastname')
+    people_list = PeopleList()
+    for person in people:
+        letter = person.lastname[0]
+        if letter not in people_list.first_letters():
+            people_list.letters.append(Letter(letter))
+        people_list.get_letter(letter).people.append(person)
+    return render_to_response('talks/people.html', {'people_list': people_list})
 
 def person(request, person_id):
     person = get_object_or_404(Person, pk=person_id)
@@ -161,3 +170,21 @@ class EditTalkForm(forms.ModelForm):
 
     class Meta:
         model = Talk
+
+class PeopleList(object):
+    def __init__(self):
+        self.letters = []
+
+    def first_letters(self):
+        return [x.letter for x in self.letters]
+
+    def get_letter(self, l):
+        for letter in self.letters:
+            if letter.letter == l:
+                return letter
+
+class Letter(object):
+    def __init__(self, letter):
+        self.letter = letter
+        self.people = []
+

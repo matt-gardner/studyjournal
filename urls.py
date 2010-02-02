@@ -9,6 +9,7 @@ topicname = '(?P<topic_id>\d+)'
 
 urlpatterns = patterns('',
     (r'^$', 'studyjournal.talks.views.index'),
+    (r'^people/$', 'studyjournal.talks.views.people'),
     (r'^person/(?P<person_id>\d+)/$', 'studyjournal.talks.views.person'),
     (r'^person/(?P<person_id>\d+)/edit$', 'studyjournal.talks.views.edit_person'),
     (r'^person/(?P<person_id>\d+)/addtalk$', 'studyjournal.talks.views.add_talk'),

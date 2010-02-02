@@ -113,11 +113,11 @@ table tbody tr:hover td input.table_button
 {
 	color:#009;
 }
-table tbody tr.hide_notes ul
+table tbody tr.hide_notes ul, ul.hide_people
 {
 	display:none;
 }
-table tbody tr.show_notes ul
+table tbody tr.show_notes ul, ul.show_people
 {
 	display:block;
 	margin:4px;
@@ -139,6 +139,10 @@ input.table_button
 	padding:0px;
 }
 input.table_button:hover
+{
+	cursor:pointer;
+}
+table th.pointer:hover, table td.notes:hover, table.people th
 {
 	cursor:pointer;
 }

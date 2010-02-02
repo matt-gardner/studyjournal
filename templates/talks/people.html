@@ -1,0 +1,32 @@
+{% extends "basetemplate.html" %}
+
+{% block title %} People {% endblock %}
+
+{% block content %}
+{% if people_list %}
+	<table class=people>
+	<thead>
+	<tr>
+	{% for letter in people_list.letters %}
+	<th onclick="toggle_people('{{ letter.letter }}')">
+		{{ letter.letter }}
+	</th>
+	{% endfor %}
+	</tr>
+	</thead>
+	</table>
+	{% for letter in people_list.letters %}
+		{% ifequal letter.letter "A" %}
+			<ul class=show_people id={{ letter.letter }}>
+		{% else %}
+			<ul class=hide_people id={{ letter.letter }}>
+		{% endifequal %}
+			{% for person in letter.people %}
+				<li><a href="/person/{{ person.id }}">{{ person.name }}</a></li>
+			{% endfor %}
+		</ul>
+	{% endfor %}
+{% else %}
+	<p> No people! </p>
+{% endif %}
+{% endblock %}
