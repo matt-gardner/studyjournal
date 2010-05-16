@@ -83,35 +83,35 @@ def main():
         try:
             sid = Person.objects.get(firstname=firstname, middlename=middlename,
                     lastname=lastname, suffix=suffix)
-            talk = Talk(speaker=sid, date=d, title=title, text=text, type=t,
-                    externallink=link)
         except Person.DoesNotExist:
             print "Didn't find", name
             print "Try a different name?"
             input = stdin.readline()
             if input == 'no\n':
                 continue
-            elif input == '\n':
-                sid = Person.objects.get(firstname='Other')
-                talk = Talk(speaker=sid, speakername=name, date=d, title=title, 
-                        text=text, type=t, externallink=link)
-                print 'Added',name+',',title
-                talk.save()
-                continue
+            elif input == 'add\n':
+                pass
             else:
                 name = input[:-1]
             firstname, middlename, lastname, suffix = split_name(name)
             try:
-                sid = Person.objects.get(firstname=firstname, middlename=middlename,
-                        lastname=lastname, suffix=suffix)
-                talk = Talk(speaker=sid, date=d, title=title, text=text, type=t,
-                        externallink=link)
+                sid = Person.objects.get(firstname=firstname,
+                        middlename=middlename, lastname=lastname, suffix=suffix)
+                print 'Found', sid.name(), 'in the database'
             except Person.DoesNotExist:
-                sid = Person.objects.get(firstname='Other')
-                talk = Talk(speaker=sid, speakername=name, date=d, title=title, 
-                        text=text, type=t, externallink=link)
-        print 'Added',name+',',title
-        talk.save()
+                sid = Person(firstname=firstname, middlename=middlename,
+                        lastname=lastname, suffix=suffix)
+                sid.save()
+                print 'Adding', sid.name(), 'to the database'
+        try:
+            Talk.objects.get(speaker=sid, date=d, title=title, type=t,
+                    externallink=link)
+            print sid.name() + ',', title, 'is already in the database'
+        except Talk.DoesNotExist:
+            talk = Talk(speaker=sid, date=d, title=title, text=text, type=t,
+                    externallink=link)
+            print 'Added',name+',',title
+            talk.save()
 
 
     
