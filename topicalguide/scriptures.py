@@ -40,13 +40,19 @@ def split_for_sorting(reference):
         if ':' in item or (item.isdigit() and i != 0):
             ref_book = ' '.join(items[:i])
             chverse = item.split(':')
-            chapter = int(chverse[0])
+            try:
+                chapter = int(chverse[0])
+            except ValueError:
+                chapter = 0
             verse = ''
             if len(chverse) > 1:
                 j = 0
                 while j < len(chverse[1]) and chverse[1][j].isdigit():
                     j += 1
-                verse = int(chverse[1][:j])
+                try:
+                    verse = int(chverse[1][:j])
+                except ValueError:
+                    verse = 0
             rest = ' '.join(items[i:])
             break
     else:
@@ -58,7 +64,10 @@ def split_for_sorting(reference):
 
 
 def get_link(reference):
-    return get_link_part(reference, '', '')
+    try:
+        return get_link_part(reference, '', '')
+    except ValueError, IndexError:
+        return reference + ' (broken link)'
 
 
 def get_link_part(reference, book, chapter):
