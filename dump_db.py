@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 from studyjournal.talks.models import Person, Talk
-from studyjournal.topicalguide.models import Topic, TalkEntry, QuoteEntry
-from studyjournal.topicalguide.models import ScriptureReferenceEntry
+from studyjournal.topicalguide.models import Topic, TalkEntry, Quote, Reference
 from subprocess import Popen
 from month import make_month_str
 from optparse import OptionParser
@@ -129,20 +128,20 @@ def output_topics():
         f.write('Last Modified: ' + last_modified_string + '\n')
         f.write('Notes: ' + topic.notes + '\n')
         f.write('Entries: \n')
-        for sr_entry in topic.scripturereferenceentry_set.all():
+        for sr_entry in topic.reference_set.all():
             f.write('Scripture: ' + sr_entry.reference + '\n')
             f.write('Notes: ' + sr_entry.notes.encode('utf-8') + '\n')
-        for q_entry in topic.quoteentry_set.all():
+        for q_entry in topic.quote_set.all():
             f.write('Quote: ' + q_entry.quote.encode('utf-8') + '\n')
             f.write('Person: ' + q_entry.person.name().encode('utf-8') + '\n')
             f.write('Source: ' + q_entry.source.encode('utf-8') + '\n')
-            f.write('Notes: ' + q_entry.notes + '\n')
+            f.write('Notes: ' + q_entry.notes.encode('utf-8') + '\n')
         for t_entry in topic.talkentry_set.all():
             f.write('Talk: ' + t_entry.talk.title.encode('utf-8') + '\n')
             f.write('Speaker: ' +
                     t_entry.talk.speaker.name().encode('utf-8') + '\n')
             f.write('Quote: ' + t_entry.quote.encode('utf-8') + '\n')
-            f.write('Notes: ' + t_entry.notes + '\n')
+            f.write('Notes: ' + t_entry.notes.encode('utf-8') + '\n')
         f.write('\n')
 
     f.write('Related Topics: \n')

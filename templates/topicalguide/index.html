@@ -15,6 +15,15 @@
 					<a href="/topics/?order_by=-indexname">Topic Name</a>
 				</th>
 			{% endifnotequal %}
+			{% ifnotequal ordering "user" %}
+				<th>
+					<a href="/topics/?order_by=user">User</a>
+				</th>
+			{% else %}
+				<th>
+					<a href="/topics/?order_by=-user">User</a>
+				</th>
+			{% endifnotequal %}
 			{% ifnotequal ordering "-scriptures" %}
 				<th>
 					<a href="/topics/?order_by=-scriptures">Scriptures</a>
@@ -54,12 +63,17 @@
 		</tr>
 	</thead>
 	<tbody>
+		<tr>
+			<td><a href="add">Add a new topic</a></td>
+			<td></td><td></td><td></td><td></td><td></td><td></td>
+		</tr>
 		{% for topic in topics %}
 			<tr>
 				<td><a href="/topic/{{ topic.id }}">{{ topic.indexname }}</a></td>
-				<td>{{ topic.scripturereferenceentry_set.all|length }}</td>
+				<td>{{ topic.user.first_name }}</td>
+				<td>{{ topic.reference_set.all|length }}</td>
 				<td>{{ topic.talkentry_set.all|length }}</td>
-				<td>{{ topic.quoteentry_set.all|length }}</td>
+				<td>{{ topic.quote_set.all|length }}</td>
 				<td>{{ topic.last_modified|timesince }} ago</td>
 				<td>
 					<form>
@@ -71,10 +85,6 @@
 				</td>
 			</tr>
 		{% endfor %}
-		<tr>
-			<td><a href="add">Add a new topic</a></td>
-			<td></td><td></td><td></td><td></td><td></td>
-		</tr>
 	</tbody>
 </table>
 {% endblock %}

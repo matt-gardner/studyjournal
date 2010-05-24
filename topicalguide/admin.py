@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-from studyjournal.topicalguide.models import Topic, TalkEntry, QuoteEntry, ScriptureReferenceEntry
+from studyjournal.topicalguide.models import Topic, TalkEntry, Quote, Reference
 from django.contrib import admin
 
-class ScriptureReferenceInline(admin.TabularInline):
-    model = ScriptureReferenceEntry
+class ReferenceInline(admin.TabularInline):
+    model = Reference
     extra = 1
 
 class TalkInline(admin.TabularInline):
@@ -14,7 +14,7 @@ class TalkInline(admin.TabularInline):
 class TopicAdmin(admin.ModelAdmin):
     list_display = ('name',)
     ordering = ['name',]
-    inlines = [ScriptureReferenceInline]
+    inlines = [ReferenceInline]
 
 
 admin.site.register(Topic, TopicAdmin)

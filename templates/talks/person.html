@@ -29,6 +29,7 @@
 		<th>Title</th>
 		<th>Type</th>
 		<th>Date</th>
+		<th>Rating</th>
 		<th>Topics</th>
 		<th>Text</th>
 		<th>Link</th>
@@ -38,6 +39,7 @@
 			<td><a href="/talk/{{ talk.id }}">{{ talk.title }}</a></td>
 			<td>{{ talk.get_type_display }}</td>
 			<td>{{ talk.date_string }}</td>
+			<td>{{ talk.get_rating }}</td>
 			<td>{{ talk.talkentry_set.all|length }}</td>
 			{% if talk.text %}
 				<td><a href="/talk/{{ talk.id }}">Text</a></td>

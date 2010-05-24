@@ -1,8 +1,7 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django import forms
-from studyjournal.topicalguide.models import Topic, TalkEntry
-from studyjournal.topicalguide.models import QuoteEntry, ScriptureReferenceEntry
+from studyjournal.topicalguide.models import Topic, TalkEntry, Quote, Reference
 from studyjournal.talks.models import Person, Talk
 from datetime import datetime
 from scriptures import get_book, split_for_sorting, books
@@ -23,10 +22,10 @@ def index(request):
         topics = list(Topic.objects.all())
         if ordering == 'scriptures':
             topics.sort(key=lambda x:
-                    (len(x.scripturereferenceentry_set.all()), x.indexname))
+                    (len(x.reference_set.all()), x.indexname))
         elif ordering == '-scriptures':
             topics.sort(key=lambda x:
-                    (-len(x.scripturereferenceentry_set.all()), x.indexname))
+                    (-len(x.reference_set.all()), x.indexname))
         elif ordering == 'talks':
             topics.sort(key=lambda x:
                     (len(x.talkentry_set.all()), x.indexname))
@@ -35,10 +34,17 @@ def index(request):
                     (-len(x.talkentry_set.all()), x.indexname))
         elif ordering == 'quotes':
             topics.sort(key=lambda x:
-                    (len(x.quoteentry_set.all()), x.indexname))
+                    (len(x.quote_set.all()), x.indexname))
         elif ordering == '-quotes':
             topics.sort(key=lambda x:
-                    (-len(x.quoteentry_set.all()), x.indexname))
+                    (-len(x.quote_set.all()), x.indexname))
+        elif ordering == 'user':
+            topics.sort(key=lambda x:
+                    (x.user.username, x.indexname))
+        elif ordering == '-user':
+            topics.sort(cmp=lambda x,y: -cmp(x[0],y[0]) if cmp(x[0], y[0])
+                    else cmp(x[1], y[1]), key=lambda x:
+                    (x.user.username, x.indexname))
     return render_to_response('topicalguide/index.html',
             {'topics' : topics, 'ordering': ordering})
 
@@ -49,10 +55,10 @@ def topic(request, topic_id):
             talkentry = TalkEntry.objects.get(pk=delete[4:])
             talkentry.delete()
         elif 'sr' in delete:
-            srentry = ScriptureReferenceEntry.objects.get(pk=delete[2:])
+            srentry = Reference.objects.get(pk=delete[2:])
             srentry.delete()
         elif 'q' in delete:
-            qentry = QuoteEntry.objects.get(pk=delete[1:])
+            qentry = Quote.objects.get(pk=delete[1:])
             qentry.delete()
         elif 'related' in delete:
             rt = Topic.objects.get(pk=delete[7:])
@@ -65,7 +71,7 @@ def topic(request, topic_id):
 
 def scriptures(request):
     scriptures = dict()
-    for entry in ScriptureReferenceEntry.objects.all():
+    for entry in Reference.objects.all():
         book = get_book(entry.reference)
         if book not in scriptures:
             scriptures[book] = []
@@ -145,11 +151,11 @@ def add_scripture_entry(request, topic_id, **kwds):
     topic = get_object_or_404(Topic, pk=topic_id)
     if request.POST:
         if request.POST['edit'] != 'False':
-            entry = ScriptureReferenceEntry.objects.get(pk=request.POST['edit'])
+            entry = Reference.objects.get(pk=request.POST['edit'])
             entry.notes = request.POST['notes'].strip()
             entry.reference = request.POST['reference']
         else:
-            entry = ScriptureReferenceEntry(
+            entry = Reference(
                     topic=topic,
                     notes=request.POST['notes'].strip(),
                     reference=request.POST['reference'],
@@ -160,7 +166,7 @@ def add_scripture_entry(request, topic_id, **kwds):
         return HttpResponseRedirect('/topic/'+topic_id)
     page_vars = dict()
     if kwds.has_key('entry_id'):
-        entry = ScriptureReferenceEntry.objects.get(pk=kwds['entry_id'])
+        entry = Reference.objects.get(pk=kwds['entry_id'])
         form = AddScriptureForm(initial={'topic': topic.name,
                 'notes': entry.notes,
                 'reference': entry.reference,
@@ -223,12 +229,12 @@ def add_quote(request, topic_id, **kwds):
     topic = get_object_or_404(Topic, pk=topic_id)
     if request.POST:
         if request.POST['edit'] != 'False':
-            entry = QuoteEntry.objects.get(pk=request.POST['edit'])
+            entry = Quote.objects.get(pk=request.POST['edit'])
             entry.person = Person.objects.get(pk=request.POST['person'])
             entry.quote = request.POST['quote']
             entry.source = request.POST['source']
         else:
-            entry = QuoteEntry(
+            entry = Quote(
                     topic=topic,
                     person=Person.objects.get(pk=request.POST['person']),
                     quote=request.POST['quote'],
@@ -241,7 +247,7 @@ def add_quote(request, topic_id, **kwds):
         return HttpResponseRedirect('/topic/'+topic_id)
     page_vars = dict()
     if kwds.has_key('entry_id'):
-        entry = QuoteEntry.objects.get(pk=kwds['entry_id'])
+        entry = Quote.objects.get(pk=kwds['entry_id'])
         form = AddQuoteForm(initial={'topic': topic.name,
                 'notes': entry.notes,
                 'person': entry.person.id, # this doesn't work -- why not?
@@ -273,7 +279,7 @@ class AddScriptureForm(forms.ModelForm):
             widget=forms.TextInput({'readonly':True}))
     edit = forms.CharField(widget=forms.HiddenInput())
     class Meta:
-        model = ScriptureReferenceEntry
+        model = Reference
         fields = ['topic','reference','notes']
 
 class AddQuoteForm(forms.ModelForm):
@@ -283,7 +289,7 @@ class AddQuoteForm(forms.ModelForm):
     person = forms.ModelChoiceField(Person.objects.all(),
             label='Person', empty_label=None)
     class Meta:
-        model = QuoteEntry
+        model = Quote
         fields = ['topic','person','quote','source','notes']
 
 class AddTalkForm(forms.ModelForm):

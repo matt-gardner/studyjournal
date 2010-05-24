@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 from studyjournal.talks.models import Talk, Person, Calling
-from studyjournal.topicalguide.models import Topic, TalkEntry, QuoteEntry
-from studyjournal.topicalguide.models import ScriptureReferenceEntry
+from studyjournal.topicalguide.models import Topic, TalkEntry, Quote, Reference
+from django.contrib.auth.models import User
 from datetime import date, datetime
 from name import split_name
 from optparse import OptionParser
@@ -27,15 +27,21 @@ def main():
             action='store_true',
             help='Import topics'
             )
+    parser.add_option('', '--all',
+            dest='all',
+            default=False,
+            action='store_true',
+            help='Import everything'
+            )
     options, args = parser.parse_args()
     did_something = False
-    if options.people:
+    if options.people or options.all:
         did_something = True
         create_people()
-    if options.talks:
+    if options.talks or options.all:
         did_something = True
         create_talks()
-    if options.topics:
+    if options.topics or options.all:
         did_something = True
         create_topics()
     if not did_something:
@@ -119,6 +125,8 @@ def parse_file(talkfile):
     month = False
     day = False
     link = ''
+    audiofile = ''
+    audiolink = ''
     while True:
         line = talkfile.readline().decode('utf-8')
         if 'SPEAKER' in line:
@@ -141,6 +149,10 @@ def parse_file(talkfile):
             day = line[5:-1]
         if 'LINK' in line:
             link = line[6:-1]
+        if 'AUDIOFILE' in line:
+            audiofile = line[11:-1]
+        if 'AUDIOLINK' in line:
+            audiolink = line[11:-1]
         if line.isspace():
             break
         if not line:
@@ -157,11 +169,13 @@ def parse_file(talkfile):
         sid = Person.objects.get(firstname=firstname, middlename=middlename,
                 lastname=lastname, suffix=suffix)
         talk = Talk(speaker=sid, date=d, title=title, text=text, topic=topic, 
-                type=type, externallink=link)
+                type=type, externallink=link, audiofile=audiofile,
+                audiolink=audiolink)
     except Person.DoesNotExist:
         sid = Person.objects.get(firstname='Other')
         talk = Talk(speaker=sid, speakername=speaker, date=d, title=title, 
-                text=text, topic=topic, type=type, externallink=link)
+                text=text, topic=topic, type=type, externallink=link,
+                audiofile=audiofile, audiolink=audiolink)
     talk.save()
 
 
@@ -196,8 +210,16 @@ def create_topics():
                     lines[i] = lines[i][7:]
                 notes += lines[i]
                 i += 1
+            ####################################
+            # ONE TIME HACK - PUT THIS IN THE DATAFILE AND REMOVE THESE LINES!!
+            ####################################
+            username = 'matt'
+            if 'Sabrina' in indexname:
+                username = 'sabrina'
+            ####################################
+            user = User.objects.get(username=username)
             topic = Topic(name=name, subheading=subheading, last_modified=dt,
-                    indexname=indexname, notes=notes[:-1])
+                    indexname=indexname, notes=notes[:-1], user=user)
             topic.save()
             continue
         if lines[i][:9] == 'Entries: ':
@@ -232,7 +254,7 @@ def get_sr_entry(lines, i, topic):
             lines[i] = lines[i][7:]
         notes += lines[i]
         i += 1
-    entry = ScriptureReferenceEntry(topic=topic, reference=ref,
+    entry = Reference(topic=topic, reference=ref,
             notes=notes[:-1])
     entry.save()
     return i
@@ -291,7 +313,7 @@ def get_q_entry(lines, i, topic):
             lines[i] = lines[i][7:]
         notes += lines[i]
         i += 1
-    entry = QuoteEntry(topic=topic, quote=quote[:-1], person=sid,
+    entry = Quote(topic=topic, quote=quote[:-1], person=sid,
             notes=notes[:-1], source=source)
     entry.save()
     return i

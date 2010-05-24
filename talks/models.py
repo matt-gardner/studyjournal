@@ -14,7 +14,7 @@ class Talk(models.Model):
             )
 
     speaker = models.ForeignKey('Person')
-    # If speaker is Other, this field is used
+    # If speaker is Other, this field is used (soon to be removed...)
     speakername = models.CharField(max_length=100, blank=True)
     date = models.DateField('Date given')
     title = models.CharField(max_length=500, blank=True)
@@ -22,6 +22,10 @@ class Talk(models.Model):
     topic = models.CharField(max_length=500, blank=True)
     type = models.CharField(max_length=5, choices=TYPE_CHOICES)
     externallink = models.CharField(max_length=500, blank=True)
+    # This is looking forward, in case I want to download all of the audio
+    # files (which I'm currently debating)
+    audiofile = models.CharField(max_length=500, blank=True)
+    audiolink = models.CharField(max_length=500, blank=True)
 
     def __unicode__(self):
         if self.speakername:
@@ -34,6 +38,29 @@ class Talk(models.Model):
 
     def date_string(self):
         return str(self.date)
+
+    def get_rating(self):
+        ratings = self.rating_set.all()
+        if ratings:
+            average = sum([int(r.rating) for r in ratings])/len(ratings)
+            return '%d (%d)' % (average, len(ratings))
+        else:
+            return 'No ratings'
+
+
+class Rating(models.Model):
+    RATING_CHOICES = (
+            (u'1', u'1'),
+            (u'2', u'2'),
+            (u'3', u'3'),
+            (u'4', u'4'),
+            (u'5', u'5'),
+            )
+
+    talk = models.ForeignKey('Talk')
+    user = models.ForeignKey('auth.User')
+    rating = models.CharField(max_length=1, choices=RATING_CHOICES)
+    comment = models.TextField()
 
 
 class Person(models.Model):
@@ -105,9 +132,21 @@ class Calling(models.Model):
             (u'C',u'Counselor in the First Presidency'),
             (u'A',u'Apostle'),
             (u'AT',u'Assistant to the Twelve'),
-            (u'S',u'Seventy'),
-            (u'B',u'Presiding Bishop'),
-            (u'PB',u'Presiding Bishopric'),
+            (u'PS',u'Presidency of the Seventy'),
+            (u'1S',u'First Quorum of the Seventy'),
+            (u'2S',u'Second Quorum of the Seventy'),
+            (u'AS',u'Area Seventy'),
+            (u'PB',u'Presiding Bishop'),
+            (u'PBRC',u'Presiding Bishopric'),
+            (u'RSP',u'Relief Society General President'),
+            (u'RSC',u'Relief Society General Presidency'),
+            (u'YWP',u'Young Women General President'),
+            (u'YWC',u'Young Women General Presidency'),
+            (u'YMP',u'Young Men General President'),
+            (u'YMC',u'Young Men General Presidency'),
+            (u'SSP',u'Sunday School General President'),
+            (u'SSC',u'Sunday School General Presidency'),
+            (u'PC',u'Patriarch of the Church'),
             (u'O',u'Other'),
             )
     calling = models.CharField(max_length=4, choices=CALLING_CHOICES)
