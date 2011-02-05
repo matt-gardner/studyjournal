@@ -66,7 +66,7 @@ def split_for_sorting(reference):
 def get_link(reference):
     try:
         return get_link_part(reference, '', '')
-    except ValueError, IndexError:
+    except (ValueError, IndexError):
         return reference + ' (broken link)'
 
 

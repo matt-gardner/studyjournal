@@ -12,10 +12,10 @@ class Topic(models.Model):
     related_topics = models.ManyToManyField('Topic')
 
     class Meta:
-        ordering = ['name']
+        ordering = ['indexname']
 
     def __unicode__(self):
-        return self.name
+        return self.indexname + ' (' + self.user.first_name + ')'
 
     def num_entries(self):
         return self.num_talks() + self.num_scriptures() + self.num_quotes()

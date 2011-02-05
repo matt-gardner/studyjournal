@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django import forms
@@ -5,6 +6,10 @@ from studyjournal.topicalguide.models import Topic, TalkEntry, Quote, Reference
 from studyjournal.talks.models import Person, Talk
 from datetime import datetime
 from scriptures import get_book, split_for_sorting, books
+
+
+# Basic views
+#############
 
 def index(request):
     if 'delete' in request.GET:
@@ -17,27 +22,27 @@ def index(request):
     if 'order_by' in request.GET:
         ordering = request.GET['order_by']
     if ordering in allowed_orderings:
-        topics = Topic.objects.order_by(ordering)
+        topics = Topic.objects.select_related().order_by(ordering)
     else:
         topics = list(Topic.objects.all())
         if ordering == 'scriptures':
             topics.sort(key=lambda x:
-                    (len(x.reference_set.all()), x.indexname))
+                    (x.reference_set.count(), x.indexname))
         elif ordering == '-scriptures':
             topics.sort(key=lambda x:
-                    (-len(x.reference_set.all()), x.indexname))
+                    (-x.reference_set.count(), x.indexname))
         elif ordering == 'talks':
             topics.sort(key=lambda x:
-                    (len(x.talkentry_set.all()), x.indexname))
+                    (x.talkentry_set.count(), x.indexname))
         elif ordering == '-talks':
             topics.sort(key=lambda x:
-                    (-len(x.talkentry_set.all()), x.indexname))
+                    (-x.talkentry_set.count(), x.indexname))
         elif ordering == 'quotes':
             topics.sort(key=lambda x:
-                    (len(x.quote_set.all()), x.indexname))
+                    (x.quote_set.count(), x.indexname))
         elif ordering == '-quotes':
             topics.sort(key=lambda x:
-                    (-len(x.quote_set.all()), x.indexname))
+                    (-x.quote_set.count(), x.indexname))
         elif ordering == 'user':
             topics.sort(key=lambda x:
                     (x.user.username, x.indexname))
@@ -47,6 +52,7 @@ def index(request):
                     (x.user.username, x.indexname))
     return render_to_response('topicalguide/index.html',
             {'topics' : topics, 'ordering': ordering})
+
 
 def topic(request, topic_id):
     if 'delete' in request.GET:
@@ -69,6 +75,7 @@ def topic(request, topic_id):
     topic = get_object_or_404(Topic, pk=topic_id)
     return render_to_response('topicalguide/topic.html', {'topic' : topic})
 
+
 def scriptures(request):
     scriptures = dict()
     for entry in Reference.objects.all():
@@ -85,6 +92,10 @@ def scriptures(request):
             scripture_set.books.append(b)
     return render_to_response('topicalguide/scriptures.html',
             {'scriptures' : scripture_set})
+
+
+# Adding and Editing views
+##########################
 
 def add_topic(request):
     error = False
@@ -112,14 +123,18 @@ def add_topic(request):
     page_vars['submit_label'] = "Add topic"
     return render_to_response('add_form.html', page_vars)
 
+
 def edit_topic(request, topic_id):
     topic = get_object_or_404(Topic, pk=topic_id)
     if request.POST:
         form = AddTopicForm(request.POST, instance=topic)
-        if form.is_valid():
-            form.save()
-            topic.last_modified = datetime.now()
-            topic.save()
+        topic.name = request.POST['name']
+        topic.user = User.objects.get(pk=request.POST['user'])
+        topic.subheading = request.POST['subheading']
+        topic.indexname = request.POST['indexname']
+        topic.notes = request.POST['notes']
+        topic.last_modified = datetime.now()
+        topic.save()
         return HttpResponseRedirect('/topic/'+str(topic.id))
     form = AddTopicForm(instance=topic)
     page_vars = dict()
@@ -181,6 +196,7 @@ def add_scripture_entry(request, topic_id, **kwds):
     page_vars['form'] = form
     return render_to_response('add_form.html', page_vars)
 
+
 def add_talk_entry(request, topic_id, **kwds):
     topic = get_object_or_404(Topic, pk=topic_id)
     if request.POST and request.POST['edit'] != 'Person':
@@ -225,6 +241,7 @@ def add_talk_entry(request, topic_id, **kwds):
     page_vars['form'] = form
     return render_to_response('add_form.html', page_vars)
 
+
 def add_quote(request, topic_id, **kwds):
     topic = get_object_or_404(Topic, pk=topic_id)
     if request.POST:
@@ -233,6 +250,7 @@ def add_quote(request, topic_id, **kwds):
             entry.person = Person.objects.get(pk=request.POST['person'])
             entry.quote = request.POST['quote']
             entry.source = request.POST['source']
+            entry.notes = request.POST['notes'].strip()
         else:
             entry = Quote(
                     topic=topic,
@@ -264,6 +282,10 @@ def add_quote(request, topic_id, **kwds):
     page_vars['form'] = form
     return render_to_response('add_form.html', page_vars)
 
+
+# Classes for forms and other stuff
+###################################
+
 class AddTopicForm(forms.ModelForm):
     def __init__(self, *args, **kwds):
         super(AddTopicForm, self).__init__(*args, **kwds)
@@ -274,6 +296,7 @@ class AddTopicForm(forms.ModelForm):
         model = Topic
         exclude = ['related_topics']
 
+
 class AddScriptureForm(forms.ModelForm):
     topic = forms.CharField(label='Topic',
             widget=forms.TextInput({'readonly':True}))
@@ -281,6 +304,7 @@ class AddScriptureForm(forms.ModelForm):
     class Meta:
         model = Reference
         fields = ['topic','reference','notes']
+
 
 class AddQuoteForm(forms.ModelForm):
     topic = forms.CharField(label='Topic',
@@ -291,6 +315,7 @@ class AddQuoteForm(forms.ModelForm):
     class Meta:
         model = Quote
         fields = ['topic','person','quote','source','notes']
+
 
 class AddTalkForm(forms.ModelForm):
     def __init__(self, edit=False, person=None, talk=None, *args, **kwds):
@@ -321,13 +346,16 @@ class AddTalkForm(forms.ModelForm):
         model = TalkEntry
         fields = ['topic','talk','quote', 'notes']
 
+
 class RelatedTopicForm(forms.Form):
     related_topic = forms.ModelChoiceField(Topic.objects.all(), label='Topic',
             empty_label=None)
 
+
 class ScriptureSet(object):
     def __init__(self):
         self.books = []
+
 
 class Book(object):
     def __init__(self, name):
@@ -336,6 +364,6 @@ class Book(object):
 
     def num_refs(self):
         return len(self.refs)
+ 
 
-
-
+# vim: et sw=4 sts=4
