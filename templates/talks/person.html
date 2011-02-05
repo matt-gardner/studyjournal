@@ -22,8 +22,8 @@
 	</ul>
 {% endif %}
 <a href="/person/{{ person.id }}/edit">Edit {{ person.name }}'s information</a>
-{% if talks %}
 <h3> Talks </h3>
+Average rating: {{ person.average_rating }}
 <table>
 	<thead>
 		<th>Title</th>
@@ -58,5 +58,4 @@
 		<td></td><td></td><td></td><td></td><td></td>
 	</tr>
 </table>
-{% endif %}
 {% endblock %}

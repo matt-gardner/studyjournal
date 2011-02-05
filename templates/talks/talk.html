@@ -19,7 +19,6 @@
 <h3>{{ talk.get_type_display }}</h3>
 <a href="edit">Edit talk information and text</a>
 <table class="topicsfortalk">
-	<col width=40%>
 	<thead>
 		<th>Topics</th>
 	</thead>
@@ -27,7 +26,7 @@
 		{% for entry in talk.talkentry_set.all %}
 		<tr>
 			<td>
-				<a href="/topic/{{ entry.topic.id }}">{{ entry.topic.name }}</a>
+				<a href="/topic/{{ entry.topic.id }}">{{ entry.topic }}</a>
 			</td>
 		</tr>
 		{% endfor %}
@@ -37,6 +36,44 @@
 				{{ topicform }}
 				<input type="submit" name="submit" value="Add to topic" />
 				</form>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<table class="ratings">
+	<thead>
+		<th colspan=5>Ratings</th>
+	</thead>
+	<tbody>
+		{% for rating in ratings %}
+		<tr>
+			<td>
+				{{ rating.rating }}
+			</td>
+			<td>
+				{{ rating.user.first_name }}
+			</td>
+			<td>
+				{{ rating.comment }}
+			</td>
+			<td>
+				<a href="rating{{ rating.id }}">Edit</a>
+			</td>
+			<td>
+				<form>
+						<input type="button"
+						onclick="confirm_delete('/talk/{{ talk.id }}',
+						'this rating from {{ talk }}',
+						'rating{{ rating.id }}')"
+						class="table_button"
+					   	value="Delete" />
+				</form>
+			</td>
+		</tr>
+		{% endfor %}
+		<tr>
+			<td colspan=5>
+				<a href="addrating">Add a rating</a>
 			</td>
 		</tr>
 	</tbody>
