@@ -8,6 +8,7 @@ class Talk(models.Model):
             (u'GC', u'General Conference'), 
             (u'CES', u'CES Fireside'),
             (u'BYU', u'BYU Devotional'), 
+            (u'BYUI', u'BYU-Idaho Devotional'),
             (u'CM', u'Church Magazine Article'),
             (u'RS', u'General Relief Society Meeting'),
             (u'YW', u'General Young Women Meeting'),
