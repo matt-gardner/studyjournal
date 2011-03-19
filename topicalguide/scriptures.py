@@ -14,7 +14,7 @@ books = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua',
         'Jude', 'Revelation', '1 Nephi', '2 Nephi', 'Jacob', 'Enos', 'Jarom',
         'Omni', 'Words of Mormon', 'Mosiah', 'Alma', 'Helaman', '3 Nephi',
         '4 Nephi', 'Mormon', 'Ether', 'Moroni', 'D&C',
-        'Doctrine and Covenants', 'Moses', 'Abraham']
+        'Doctrine and Covenants', 'Moses', 'Abraham', 'Joseph Smith History']
 
 links = ['gen','ex','lev','num','duet','josh','judg','ruth','1_sam','2_sam',
         '1_kgs','2_kgs','1_chr','2_chr','ezra','neh','esth','job','ps','prov',
@@ -24,7 +24,7 @@ links = ['gen','ex','lev','num','duet','josh','judg','ruth','1_sam','2_sam',
         'col','1_thes','2_thes','1_tim','2_tim','titus','philem','heb','james',
         '1_pet','2_pet','1_jn','2_jn','3_jn','judge','rev','1_ne','2_ne',
         'jacob','enos','jarom','omni','w_of_m','mosiah','alma','hel','3_ne',
-        '4_ne','morm','ether','moro','dc','dc','moses','abr']
+        '4_ne','morm','ether','moro','dc','dc','moses','abr', 'js_h']
 
 def clean_reference(ref):
     ref= ref.replace(',', '')
