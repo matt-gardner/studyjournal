@@ -48,6 +48,7 @@ def talk(request, talk_id):
     page_vars['talk'] = talk
     page_vars['topicform'] = topicform
     page_vars['ratings'] = talk.rating_set.order_by('-rating')
+    page_vars['link'] = talk.externallink
     return render_to_response('talks/talk.html', page_vars)
 
 
@@ -96,7 +97,8 @@ def callings(request):
 ##########################
 
 def edit_person(request, person_id):
-    CallingFormSet = forms.models.inlineformset_factory(Person, Calling, extra=1)
+    CallingFormSet = forms.models.inlineformset_factory(Person, Calling,
+            extra=1)
     person = get_object_or_404(Person, pk=person_id)
     if request.POST:
         form = EditPersonForm(request.POST, instance=person)
@@ -194,6 +196,20 @@ def add_rating_to_talk(request, talk_id, rating_id=None):
     return render_to_response('add_form.html', page_vars)
 
 
+# Other views
+#############
+
+def talk_pdf(request, talk_id, width):
+    from speed_reading import format_text
+    width = float(width)
+    text = Talk.objects.get(pk=talk_id).text
+    pdf_loc = format_text.make_pdf(text, width, '/tmp/')
+    response = HttpResponse(mimetype='application/pdf')
+    response['Content-Disposition'] = 'filename=%s' % pdf_loc
+    response.write(open(pdf_loc).read())
+    return response
+
+
 # Classes for forms and other stuff
 ###################################
 
@@ -266,6 +282,6 @@ class Letter(object):
     def __init__(self, letter):
         self.letter = letter
         self.people = []
- 
+
 
 # vim: et sw=4 sts=4

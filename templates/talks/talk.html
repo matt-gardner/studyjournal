@@ -17,6 +17,9 @@
 </a>
 <h3>{{ talk.date }}</h3>
 <h3>{{ talk.get_type_display }}</h3>
+{% if link %}
+<h4><a href={{ link }}>External Link</a></h4>
+{% endif %}
 <a href="edit">Edit talk information and text</a>
 <table class="topicsfortalk">
 	<thead>
@@ -79,5 +82,6 @@
 	</tbody>
 </table>
 <h3>Text:</h3>
-{{ talk.text|linebreaks }} 
+<h4><a href=/talk-pdf/{{talk.id}}/2.5>View as pdf</a></h4>
+{{ talk.text|linebreaks }}
 {% endblock %}
