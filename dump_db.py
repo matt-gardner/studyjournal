@@ -1,11 +1,19 @@
 #!/usr/bin/env python
 
-from studyjournal.talks.models import Person, Talk
-from studyjournal.topicalguide.models import Topic, TalkEntry, Quote, Reference
-from subprocess import Popen
+import os, sys
+
+sys.path.append(os.curdir+'/../')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'studyjournal.settings'
+
+import simplejson
+
+from dirutil import create_dirs_and_open
 from month import make_month_str
 from optparse import OptionParser
-import os
+from studyjournal.talks.models import Person, Talk
+from studyjournal.topicalguide.models import Topic, TalkEntry, Quote, Reference
+
+BASE_DIR = ''
 
 def main():
     parser = OptionParser()
@@ -27,7 +35,20 @@ def main():
             action='store_true',
             help='Dump topics'
             )
+    parser.add_option('-b', '--base-dir',
+            dest='base_dir',
+            default='data',
+            help='Base directory for the data dump'
+            )
     options, args = parser.parse_args()
+    if os.path.exists(options.base_dir):
+        print 'The dump directory you gave already exists!  Data could be '\
+                'overwritten.\nQuitting...'
+        exit(-1)
+    global BASE_DIR
+    BASE_DIR = options.base_dir
+    if not BASE_DIR.endswith('/'):
+        BASE_DIR += '/'
     did_something = False
     if options.people:
         did_something = True
@@ -42,7 +63,7 @@ def main():
         print 'Did you forget to specify what you wanted to output?'
 
 def output_people():
-    f = open('people.txt', 'w')
+    f = open(BASE_DIR + 'people.txt', 'w')
     for person in Person.objects.all().order_by('lastname'):
         if person.lastname == 'Other':
             continue
@@ -68,53 +89,44 @@ def output_people():
 
 def output_talks():
     talks = []
-    for type, long_type in Talk.TYPE_CHOICES:
-        if not os.path.exists(type.lower()):
-            proc = Popen(('mkdir', type.lower()))
-            proc.wait()
     for talk in Talk.objects.all():
         typestr = talk.type.lower()
         yearstr = str(talk.date.year)
         monthstr = make_month_str(talk.date.month)
-        if not os.path.exists(typestr+'/'+yearstr):
-            proc = Popen(('mkdir', typestr+'/'+yearstr))
-            proc.wait()
-        if not os.path.exists(typestr+'/'+yearstr+'/'+monthstr):
-            proc = Popen(('mkdir', typestr+'/'+yearstr+'/'+monthstr))
-            proc.wait()
         talkfile = typestr+'/'+yearstr+'/'+monthstr+'/'+str(talk.id)+'.txt'
         talks.append(talkfile)
         output_talk(talk, talkfile)
-    f = open('indexfile.txt', 'w')
+    f = open(BASE_DIR + 'indexfile.txt', 'w')
     for talk in talks:
         f.write(talk+'\n')
     f.close()
 
 def output_talk(talk, talkfile):
-        f = open(talkfile, 'w')
-        if talk.speakername:
-            f.write('SPEAKER: '+talk.speakername.encode('utf-8')+'\n')
-        else:
-            f.write('SPEAKER: '+talk.speaker.name().encode('utf-8')+'\n')
-        try:
-            calling = talk.speaker.get_calling(talk.date)
-            f.write('CALLING: '+calling.encode('utf-8')+'\n')
-        except ValueError:
-            f.write('CALLING: Unknown\n')
-        f.write('GENDER: '+talk.speaker.gender.encode('utf-8')+'\n')
-        f.write('TITLE: '+talk.title.encode('utf-8')+'\n')
-        f.write('TOPIC: '+talk.topic.encode('utf-8')+'\n')
-        f.write('TYPE: '+talk.type.encode('utf-8')+'\n')
-        f.write('YEAR: '+str(talk.date.year)+'\n')
-        f.write('MONTH: '+str(talk.date.month)+'\n')
-        f.write('DAY: '+str(talk.date.day)+'\n')
-        f.write('LINK: '+str(talk.externallink)+'\n')
-        f.write('\n')
-        f.write(talk.text.encode('utf-8'))
-        f.close()
+    f = create_dirs_and_open(BASE_DIR + talkfile)
+    json = {}
+    if talk.speakername:
+        json['speaker'] = talk.speakername
+    else:
+        json['speaker'] = talk.speaker.name()
+    try:
+        calling = talk.speaker.get_calling(talk.date)
+        json['calling'] = calling
+    except ValueError:
+        json['calling'] = 'Unknown'
+    json['gender'] = talk.speaker.gender
+    json['title'] = talk.title
+    json['topic'] = talk.topic
+    json['type'] = talk.type
+    json['year'] = talk.date.year
+    json['month'] = talk.date.month
+    json['day'] = talk.date.day
+    json['link'] = talk.externallink
+    json['text'] = talk.text
+    f.write(simplejson.dumps(json, indent=2))
+    f.close()
 
 def output_topics():
-    f = open('topics.txt', 'w')
+    f = open(BASE_DIR + 'topics.txt', 'w')
     for topic in Topic.objects.all().order_by('name'):
         f.write('Topic: ' + topic.name + '\n')
         f.write('Subheading: ' + topic.subheading + '\n')
@@ -150,7 +162,7 @@ def output_topics():
             f.write(topic.name + ' === ' + t.name + '\n')
     f.write('\n')
     f.close()
-    
+
 
 if __name__ == '__main__':
     main()
