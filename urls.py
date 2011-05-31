@@ -68,9 +68,6 @@ urlpatterns = patterns('',
     (r'^callings/$',
         'studyjournal.talks.views.callings'),
 
-    (r'^admin/(.*)',
-        admin.site.root),
-
     (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',
             {'document_root': settings.MEDIA_ROOT}),
 
