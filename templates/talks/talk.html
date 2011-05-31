@@ -17,9 +17,11 @@
 </a>
 <h3>{{ talk.date }}</h3>
 <h3>{{ talk.get_type_display }}</h3>
+{% if link %}
+<h4><a href={{ link }}>External Link</a></h4>
+{% endif %}
 <a href="edit">Edit talk information and text</a>
 <table class="topicsfortalk">
-	<col width=40%>
 	<thead>
 		<th>Topics</th>
 	</thead>
@@ -27,7 +29,7 @@
 		{% for entry in talk.talkentry_set.all %}
 		<tr>
 			<td>
-				<a href="/topic/{{ entry.topic.id }}">{{ entry.topic.name }}</a>
+				<a href="/topic/{{ entry.topic.id }}">{{ entry.topic }}</a>
 			</td>
 		</tr>
 		{% endfor %}
@@ -41,6 +43,45 @@
 		</tr>
 	</tbody>
 </table>
+<table class="ratings">
+	<thead>
+		<th colspan=5>Ratings</th>
+	</thead>
+	<tbody>
+		{% for rating in ratings %}
+		<tr>
+			<td>
+				{{ rating.rating }}
+			</td>
+			<td>
+				{{ rating.user.first_name }}
+			</td>
+			<td>
+				{{ rating.comment|linebreaks }}
+			</td>
+			<td>
+				<a href="rating{{ rating.id }}">Edit</a>
+			</td>
+			<td>
+				<form>
+						<input type="button"
+						onclick="confirm_delete('/talk/{{ talk.id }}',
+						'this rating from {{ talk }}',
+						'rating{{ rating.id }}')"
+						class="table_button"
+					   	value="Delete" />
+				</form>
+			</td>
+		</tr>
+		{% endfor %}
+		<tr>
+			<td colspan=5>
+				<a href="addrating">Add a rating</a>
+			</td>
+		</tr>
+	</tbody>
+</table>
 <h3>Text:</h3>
-{{ talk.text|linebreaks }} 
+<h4><a href=/talk-pdf/{{talk.id}}/2.1>View as pdf</a></h4>
+{{ talk.text|linebreaks }}
 {% endblock %}

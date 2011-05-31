@@ -8,9 +8,11 @@ class Talk(models.Model):
             (u'GC', u'General Conference'), 
             (u'CES', u'CES Fireside'),
             (u'BYU', u'BYU Devotional'), 
+            (u'BYUI', u'BYU-Idaho Devotional'),
             (u'CM', u'Church Magazine Article'),
             (u'RS', u'General Relief Society Meeting'),
             (u'YW', u'General Young Women Meeting'),
+            (u'O', u'Other'),
             )
 
     speaker = models.ForeignKey('Person')
@@ -99,10 +101,6 @@ class Person(models.Model):
                     callings.append(calling)
         return ', '.join([x.__unicode__() for x in callings])
 
-    def numtalks(self):
-        return str(len(self.talk_set.all()))
-    numtalks.short_description='Number of Talks'
-
     def get_calling(self, date):
         for calling in self.calling_set.all():
             if not calling.enddate:
@@ -116,8 +114,26 @@ class Person(models.Model):
             raise ValueError(self.name()+\
                     ' did not have a calling on '+str(date))
 
+    def numtalks(self):
+        return str(len(self.talk_set.all()))
+    numtalks.short_description='Number of Talks'
+
     def __unicode__(self):
         return self.name()
+
+    def average_rating(self):
+        ratings = []
+        for talk in self.talk_set.all():
+            for rating in talk.rating_set.all():
+                ratings.append(int(rating.rating))
+        if not ratings:
+            return 'No ratings'
+        num = len(ratings)
+        average = float(sum(ratings)) / num
+        if average % 1 == 0.0:
+            return '%d (with %d ratings)' % (average, num)
+        else:
+            return '%.1f (with %d ratings)' % (average, num)
 
     class Meta:
         ordering = ['lastname', 'firstname']

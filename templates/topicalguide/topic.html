@@ -39,7 +39,7 @@
 			<a href='/talk/{{ talk.talk.id }}'>{{ talk.talk.title }}</a>,
 			<a href='/person/{{talk.talk.speaker.id}}'>{{ talk.talk.speaker.name }}</a>
 			{% if talk.notes %}
-			<ul><li>{{ talk.notes }}</li></ul></td>
+			<ul><li>{{ talk.notes|linebreaks }}</li></ul></td>
 			<td class=notes>Notes</td>
 			{% else %}
 			<td></td></td>
@@ -83,7 +83,7 @@
 		<tr class=no_notes>
 		{% endif %}
 			{% if ref.notes %}
-			<td> {{ ref.get_link }} <ul><li>{{ ref.notes }}</li></ul></td>
+			<td> {{ ref.get_link }} <ul><li>{{ ref.notes|linebreaks}}</li></ul></td>
 			<td class=notes>Notes</td>
 			{% else %}
 			<td> {{ ref.get_link }} </td><td></td>
@@ -130,7 +130,7 @@
 	-- <a href='/person/{{ quote.person.id }}'>{{ quote.person.name }},</a>
 	{{ quote.source }}
 	{% if quote.notes %}
-	<ul><li>{{ quote.notes }}</li></ul></td>
+	<ul><li>{{ quote.notes|linebreaks }}</li></ul></td>
 	<td class=notes>Notes</td>
 	{% else %}
 	<td></td></td>
@@ -163,7 +163,7 @@
 	<tbody>
 		{% for r_topic in topic.related_topics.all %}
 			<tr>
-				<td><a href="/topic/{{ r_topic.id }}">{{ r_topic.name }}</a></td>
+				<td><a href="/topic/{{ r_topic.id }}">{{ r_topic }}</a></td>
 				<td>
 					<form>
 							<input type="button"
