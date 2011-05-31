@@ -18,6 +18,8 @@ div.page
 	left:8%;
 	max-width:85%;
 }
+
+/* Other stuff */
 a:link, a:visited
 {
 	color:blue;
