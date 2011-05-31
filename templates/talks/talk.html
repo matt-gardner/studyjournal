@@ -57,7 +57,7 @@
 				{{ rating.user.first_name }}
 			</td>
 			<td>
-				{{ rating.comment }}
+				{{ rating.comment|linebreaks }}
 			</td>
 			<td>
 				<a href="rating{{ rating.id }}">Edit</a>
@@ -82,6 +82,6 @@
 	</tbody>
 </table>
 <h3>Text:</h3>
-<h4><a href=/talk-pdf/{{talk.id}}/2.5>View as pdf</a></h4>
+<h4><a href=/talk-pdf/{{talk.id}}/2.1>View as pdf</a></h4>
 {{ talk.text|linebreaks }}
 {% endblock %}
