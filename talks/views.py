@@ -201,8 +201,14 @@ def add_rating_to_talk(request, talk_id, rating_id=None):
 
 def talk_pdf(request, talk_id, width):
     from speed_reading import format_text
+    from remove_html_tags import get_unicode_conversions, unicode_to_latex
     width = float(width)
     text = Talk.objects.get(pk=talk_id).text
+    length = len(text.split())
+    text = unicode_to_latex(text, get_unicode_conversions())
+    now = datetime.now()
+    now = '%d:%02d:%02d' % (now.hour % 12, now.minute, now.second)
+    text = 'Length: %d words.  Started: %s\n\n' % (length, now) + text
     pdf_loc = format_text.make_pdf(text, width, '/tmp/')
     response = HttpResponse(mimetype='application/pdf')
     response['Content-Disposition'] = 'filename=%s' % pdf_loc
