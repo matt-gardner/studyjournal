@@ -24,7 +24,7 @@ def index(request):
     if ordering in allowed_orderings:
         topics = Topic.objects.select_related().order_by(ordering)
     else:
-        topics = list(Topic.objects.all())
+        topics = list(Topic.objects.select_related().all())
         if ordering == 'scriptures':
             topics.sort(key=lambda x:
                     (x.reference_set.count(), x.indexname))
