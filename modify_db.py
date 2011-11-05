@@ -9,4 +9,6 @@ from studyjournal.topicalguide.models import *
 from studyjournal.talks.models import *
 from django.contrib.auth.models import User
 
+monson = Person.objects.get(firstname="Thomas", lastname="Monson")
+
 # vim: et sw=4 sts=4
