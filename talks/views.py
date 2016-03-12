@@ -245,11 +245,13 @@ class AddRatingToTalkForm(forms.ModelForm):
     class Meta:
         model = Rating
         exclude = ['talk']
+        fields = '__all__'
 
 
 class EditPersonForm(forms.ModelForm):
     class Meta:
         model = Person
+        fields = '__all__'
 
 
 class EditTalkForm(forms.ModelForm):
@@ -269,6 +271,7 @@ class EditTalkForm(forms.ModelForm):
 
     class Meta:
         model = Talk
+        fields = '__all__'
 
 
 class PeopleList(object):
